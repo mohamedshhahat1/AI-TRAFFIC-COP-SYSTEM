@@ -6,6 +6,8 @@ function StatsCards({ stats }) {
     { icon: '🚨', label: 'Total Violations', value: stats.total_violations || 0, cls: 'warning' },
     { icon: '⚡', label: 'Avg Speed', value: `${stats.avg_speed || 0} km/h`, cls: 'info' },
     { icon: '🚦', label: 'Congestion', value: stats.congestion_level || 'Free', cls: 'success' },
+    { icon: '🔥', label: 'Events/sec', value: stats.events_per_second || 0, cls: 'info' },
+    { icon: '❤️', label: 'Health', value: `${stats.health_score || 100}%`, cls: stats.health_score < 80 ? 'warning' : 'success' },
   ];
 
   return (

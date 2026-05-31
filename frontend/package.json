@@ -1,7 +1,7 @@
 {
   "name": "ai-traffic-cop-dashboard",
   "version": "1.0.0",
-  "description": "AI Traffic Cop System - Real-time Monitoring Dashboard",
+  "description": "AI Traffic Cop System - Real-time Monitoring Dashboard with Event Bus & Health Monitoring",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -14,5 +14,6 @@
     "chart.js": "^4.4.0",
     "react-chartjs-2": "^5.2.0",
     "axios": "^1.6.0"
-  }
+  },
+  "proxy": "http://localhost:8000"
 }

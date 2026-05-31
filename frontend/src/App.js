@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Dashboard from './pages/Dashboard';
 import Violations from './pages/Violations';
+import Monitoring from './pages/Monitoring';
 import './App.css';
 
 function App() {
@@ -19,11 +20,19 @@ function App() {
               onClick={() => setCurrentPage('violations')}>
             🚨 Violations
           </li>
+          <li className={currentPage === 'monitoring' ? 'active' : ''} 
+              onClick={() => setCurrentPage('monitoring')}>
+            📈 Monitoring
+          </li>
         </ul>
+        <div className="sidebar-footer">
+          <small>Event-Driven Architecture</small>
+        </div>
       </nav>
       <main className="content">
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'violations' && <Violations />}
+        {currentPage === 'monitoring' && <Monitoring />}
       </main>
     </div>
   );
