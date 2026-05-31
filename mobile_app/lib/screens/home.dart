@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _stats = {};
   Map<String, dynamic> _health = {};
+  Map<String, dynamic> _cameraStats = {};
   bool _isLoading = true;
 
   @override
@@ -28,10 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final results = await Future.wait([
       ApiService.fetchStats(),
       ApiService.fetchHealth(),
+      ApiService.fetchCameraStats(),
     ]);
     setState(() {
       _stats = results[0];
       _health = results[1];
+      _cameraStats = results[2];
       _isLoading = false;
     });
   }
@@ -66,54 +69,73 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildLiveEventBanner(eventService),
                   const SizedBox(height: 16),
 
+                  // Camera Feed Card
+                  _buildCameraCard(),
+                  const SizedBox(height: 16),
+
                   // Stats Cards
-                  StatCard(
-                    icon: Icons.directions_car,
-                    label: 'Vehicles Tracked',
-                    value: '${_stats['total_vehicles'] ?? 0}',
-                    color: Colors.blue,
-                  ),
-                  StatCard(
-                    icon: Icons.warning_amber,
-                    label: 'Total Violations',
-                    value: '${_stats['total_violations'] ?? eventService.violationCount}',
-                    color: Colors.orange,
-                  ),
-                  StatCard(
-                    icon: Icons.speed,
-                    label: 'Average Speed',
-                    value: '${_stats['avg_speed'] ?? 0} km/h',
-                    color: Colors.cyan,
-                  ),
-                  StatCard(
-                    icon: Icons.traffic,
-                    label: 'Congestion',
-                    value: eventService.congestionLevel.toUpperCase(),
-                    color: _getCongestionColor(eventService.congestionLevel),
-                  ),
-                  StatCard(
-                    icon: Icons.bolt,
-                    label: 'Live Events',
-                    value: '${eventService.events.length}',
-                    color: Colors.purple,
-                  ),
-                  StatCard(
-                    icon: Icons.monitor_heart,
-                    label: 'Health Score',
-                    value: '${_health['score'] ?? 100}%',
-                    color: _getHealthColor(_health['score'] ?? 100),
-                  ),
+                  StatCard(icon: Icons.directions_car, label: 'Vehicles Tracked', value: '${_cameraStats['tracks'] ?? 0}', color: Colors.blue),
+                  StatCard(icon: Icons.warning_amber, label: 'Violations Detected', value: '${_cameraStats['violations'] ?? 0}', color: Colors.orange),
+                  StatCard(icon: Icons.speed, label: 'FPS', value: '${_cameraStats['fps'] ?? 0}', color: Colors.cyan),
+                  StatCard(icon: Icons.movie, label: 'Frames Processed', value: '${_cameraStats['frame'] ?? 0}', color: Colors.purple),
+                  StatCard(icon: Icons.traffic, label: 'Congestion', value: '${_cameraStats['congestion'] ?? 'free'}'.toUpperCase(), color: _getCongestionColor(_cameraStats['congestion'] ?? 'free')),
+                  StatCard(icon: Icons.bolt, label: 'Live Events', value: '${eventService.events.length}', color: Colors.amber),
+                  StatCard(icon: Icons.monitor_heart, label: 'Health Score', value: '${_health['score'] ?? 100}%', color: _getHealthColor(_health['score'] ?? 100)),
 
                   const SizedBox(height: 24),
                   const Text('System Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-                  _buildStatusTile('AI Pipeline', true),
+                  _buildStatusTile('AI Pipeline', _cameraStats['running'] == true),
                   _buildStatusTile('Event Bus', eventService.isConnected),
-                  _buildStatusTile('Camera Feed', true),
-                  _buildStatusTile('Alert System', true),
+                  _buildStatusTile('YOLOv8 Model', true),
+                  _buildStatusTile('DeepSORT Tracker', true),
                   _buildStatusTile('Monitoring', true),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildCameraCard() {
+    final isRunning = _cameraStats['running'] == true;
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(Icons.videocam, color: isRunning ? Colors.green : Colors.grey),
+            title: Text(isRunning ? '● LIVE - Processing' : 'Camera Offline'),
+            subtitle: Text('FPS: ${_cameraStats['fps'] ?? 0} | Frame: ${_cameraStats['frame'] ?? 0}'),
+            trailing: ElevatedButton(
+              onPressed: () async {
+                if (isRunning) {
+                  await ApiService.stopCamera();
+                } else {
+                  await ApiService.startCamera();
+                }
+                _loadData();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isRunning ? Colors.red : Colors.green,
+              ),
+              child: Text(isRunning ? 'Stop' : 'Start'),
+            ),
+          ),
+          if (isRunning)
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  'http://10.0.2.2:8000/api/camera/feed',
+                  errorBuilder: (ctx, err, stack) => Container(
+                    height: 200,
+                    color: Colors.black,
+                    child: const Center(child: Text('Video stream loading...', style: TextStyle(color: Colors.white))),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -138,15 +160,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '🔥 Live: ${type.replaceAll('_', ' ').toUpperCase()}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-                Text(
-                  latest['data']?.toString().substring(0, 60) ?? '',
-                  style: TextStyle(fontSize: 11, color: Colors.grey[400]),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text('🔥 Live: ${type.replaceAll('_', ' ').toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                Text(latest['data']?.toString().substring(0, 60) ?? '', style: TextStyle(fontSize: 11, color: Colors.grey[400]), overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -159,25 +174,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListTile(
       leading: Icon(Icons.circle, color: active ? Colors.green : Colors.red, size: 12),
       title: Text(name),
-      trailing: Text(active ? 'Active' : 'Offline',
-          style: TextStyle(color: active ? Colors.green : Colors.red)),
+      trailing: Text(active ? 'Active' : 'Offline', style: TextStyle(color: active ? Colors.green : Colors.red)),
     );
   }
 
   Color _getCongestionColor(String level) {
-    switch (level) {
-      case 'free': return Colors.green;
-      case 'moderate': return Colors.yellow;
-      case 'heavy': return Colors.orange;
-      case 'gridlock': return Colors.red;
-      default: return Colors.grey;
-    }
+    switch (level) { case 'free': return Colors.green; case 'moderate': return Colors.yellow; case 'heavy': return Colors.orange; case 'gridlock': return Colors.red; default: return Colors.grey; }
   }
 
   Color _getHealthColor(dynamic score) {
     final s = (score is int) ? score : 100;
-    if (s >= 80) return Colors.green;
-    if (s >= 50) return Colors.orange;
-    return Colors.red;
+    if (s >= 80) return Colors.green; if (s >= 50) return Colors.orange; return Colors.red;
   }
 }

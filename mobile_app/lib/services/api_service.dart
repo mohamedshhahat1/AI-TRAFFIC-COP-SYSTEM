@@ -148,4 +148,27 @@ class ApiService {
       return false;
     }
   }
+
+
+  static Future<Map<String, dynamic>> fetchCameraStats() async {
+    try {
+      final response = await http.get(Uri.parse('\$baseUrl/camera/stats'));
+      if (response.statusCode == 200) return json.decode(response.body);
+    } catch (e) { print('API Error: \$e'); }
+    return {"running": false, "fps": 0, "frame": 0, "tracks": 0};
+  }
+
+  static Future<bool> startCamera() async {
+    try {
+      final response = await http.post(Uri.parse('\$baseUrl/camera/start?source=data/videos/traffic.mp4'));
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
+
+  static Future<bool> stopCamera() async {
+    try {
+      final response = await http.post(Uri.parse('\$baseUrl/camera/stop'));
+      return response.statusCode == 200;
+    } catch (e) { return false; }
+  }
 }

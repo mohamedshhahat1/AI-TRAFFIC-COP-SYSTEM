@@ -4,7 +4,7 @@ import 'screens/home.dart';
 import 'screens/violations.dart';
 import 'screens/monitoring.dart';
 import 'screens/events.dart';
-import 'services/api_service.dart';
+import 'screens/results.dart';
 import 'services/event_service.dart';
 
 void main() {
@@ -57,12 +57,12 @@ class _MainScreenState extends State<MainScreen> {
     ViolationsScreen(),
     MonitoringScreen(),
     EventsScreen(),
+    ResultsScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
-    // Connect to WebSocket event stream on app start
     context.read<EventService>().connect();
   }
 
@@ -78,6 +78,7 @@ class _MainScreenState extends State<MainScreen> {
           NavigationDestination(icon: Icon(Icons.warning_amber), label: 'Violations'),
           NavigationDestination(icon: Icon(Icons.monitor_heart), label: 'Monitoring'),
           NavigationDestination(icon: Icon(Icons.bolt), label: 'Events'),
+          NavigationDestination(icon: Icon(Icons.analytics), label: 'Results'),
         ],
       ),
     );
