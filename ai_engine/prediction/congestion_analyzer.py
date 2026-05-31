@@ -7,7 +7,11 @@ import numpy as np
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from collections import deque
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("congestion_analyzer")
+except ImportError:
+    from loguru import logger
 import time
 
 

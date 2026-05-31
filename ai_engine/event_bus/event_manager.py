@@ -42,7 +42,11 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("event_manager")
+except ImportError:
+    from loguru import logger
 
 
 class EventPriority(IntEnum):

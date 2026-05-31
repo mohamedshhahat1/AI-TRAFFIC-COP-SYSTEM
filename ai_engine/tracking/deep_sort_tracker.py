@@ -5,7 +5,11 @@ Multi-object tracking with re-identification for persistent vehicle IDs.
 
 import numpy as np
 from typing import List, Dict, Optional, Tuple
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("deep_sort_tracker")
+except ImportError:
+    from loguru import logger
 import time
 
 try:

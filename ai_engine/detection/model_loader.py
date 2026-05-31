@@ -5,7 +5,11 @@ Handles loading, caching, and managing AI models.
 
 import os
 from pathlib import Path
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("model_loader")
+except ImportError:
+    from loguru import logger
 from typing import Optional
 
 try:

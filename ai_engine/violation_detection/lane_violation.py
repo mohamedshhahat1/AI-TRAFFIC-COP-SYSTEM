@@ -5,7 +5,11 @@ Detects illegal lane changes and wrong-way driving.
 
 from dataclasses import dataclass
 from typing import Optional, List
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("lane_violation")
+except ImportError:
+    from loguru import logger
 import time
 
 

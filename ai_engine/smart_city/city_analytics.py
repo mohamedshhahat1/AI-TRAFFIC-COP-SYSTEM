@@ -5,7 +5,11 @@ Aggregates data across all cameras for city-level insights.
 
 from typing import Dict, List, Optional
 from collections import defaultdict
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("city_analytics")
+except ImportError:
+    from loguru import logger
 import time
 
 

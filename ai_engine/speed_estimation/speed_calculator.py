@@ -4,9 +4,14 @@ Estimates vehicle speed from pixel displacement and calibration data.
 """
 
 import numpy as np
+import cv2
 from typing import Dict, List, Tuple, Optional
 from collections import deque
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("speed_calculator")
+except ImportError:
+    from loguru import logger
 
 
 class SpeedCalculator:
@@ -97,7 +102,6 @@ class SpeedCalculator:
     
     def calibrate(self, pixel_pts: List[Tuple], real_pts: List[Tuple]):
         """Set perspective transform for accurate measurement."""
-        import cv2
         src = np.array(pixel_pts, dtype=np.float32)
         dst = np.array(real_pts, dtype=np.float32)
         self._perspective_matrix = cv2.getPerspectiveTransform(src, dst)

@@ -5,7 +5,11 @@ Integrates data from multiple camera feeds for city-wide monitoring.
 
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("multi_camera_fusion")
+except ImportError:
+    from loguru import logger
 import time
 
 

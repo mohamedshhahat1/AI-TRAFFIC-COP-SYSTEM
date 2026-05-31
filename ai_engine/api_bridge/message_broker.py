@@ -14,7 +14,11 @@ import asyncio
 from typing import Dict, List, Callable, Any, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("message_broker")
+except ImportError:
+    from loguru import logger
 import time
 import json
 

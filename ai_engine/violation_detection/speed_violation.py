@@ -5,7 +5,11 @@ Detects vehicles exceeding the speed limit.
 
 from dataclasses import dataclass
 from typing import Optional
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("speed_violation")
+except ImportError:
+    from loguru import logger
 import time
 
 

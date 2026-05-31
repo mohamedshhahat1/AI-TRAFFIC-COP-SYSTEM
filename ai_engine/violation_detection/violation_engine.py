@@ -8,7 +8,11 @@ import numpy as np
 from typing import List, Dict, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("violation_engine")
+except ImportError:
+    from loguru import logger
 import time
 import uuid
 from pathlib import Path

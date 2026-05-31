@@ -5,9 +5,14 @@ Detects vehicles parked in forbidden zones.
 
 from dataclasses import dataclass
 from typing import Optional, Dict, List
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("parking_violation")
+except ImportError:
+    from loguru import logger
 import time
 import numpy as np
+import cv2
 
 
 @dataclass
@@ -77,7 +82,6 @@ class ParkingViolationDetector:
         if not self.forbidden_zones:
             return True  # If no zones defined, all areas are monitored
         
-        import cv2
         for zone in self.forbidden_zones:
             if len(zone) >= 3:
                 pts = np.array(zone, dtype=np.int32)

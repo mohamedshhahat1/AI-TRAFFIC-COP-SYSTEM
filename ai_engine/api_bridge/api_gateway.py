@@ -16,10 +16,15 @@ Benefits:
 
 import numpy as np
 from typing import Dict, List, Optional, Callable
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("api_gateway")
+except ImportError:
+    from loguru import logger
 
 from .inference_service import InferenceService
 from .message_broker import MessageBroker
+from ..event_bus.event_manager import EventManager
 
 
 class AIGateway:
@@ -73,6 +78,20 @@ class AIGateway:
         self.inference.start()
         self._is_running = True
         logger.info("✅ AIGateway started - all services running")
+    
+    @property
+    def event_bus(self) -> EventManager:
+        """
+        Access the pipeline's Event Bus directly.
+        Provides the full-featured EventManager (priorities, wildcards, replay).
+        
+        Usage:
+            gateway.event_bus.on("violation.*", my_handler)
+            gateway.event_bus.on("accident.risk", emergency_handler)
+        """
+        if self.inference._pipeline:
+            return self.inference._pipeline.event_bus
+        return EventManager()  # Fallback empty bus
     
     def stop(self):
         """Stop all AI services."""

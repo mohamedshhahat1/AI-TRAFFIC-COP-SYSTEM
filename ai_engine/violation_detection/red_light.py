@@ -5,7 +5,11 @@ Detects vehicles running red traffic lights.
 
 from dataclasses import dataclass
 from typing import Optional
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("red_light")
+except ImportError:
+    from loguru import logger
 import time
 
 

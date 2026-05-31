@@ -7,7 +7,11 @@ import cv2
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("yolo_detector")
+except ImportError:
+    from loguru import logger
 
 from .model_loader import ModelLoader
 
