@@ -233,17 +233,18 @@ async def video_feed():
     """MJPEG video stream with annotated frames (bounding boxes, IDs, speed)."""
     import time
     
+    BOUNDARY = b"--frame"
+    CRLF = b"\r\n"
+    CONTENT_TYPE = b"Content-Type: image/jpeg"
+    
     def generate():
         while True:
             if video_processor and video_processor._latest_frame:
                 frame = video_processor._latest_frame
-                yield (b"--frame\r\n"
-                       b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
-            time.sleep(0.1)  # ~10 FPS stream
+                yield BOUNDARY + CRLF + CONTENT_TYPE + CRLF + CRLF + frame + CRLF
+            time.sleep(0.1)
     
     return StreamingResponse(generate(), media_type="multipart/x-mixed-replace; boundary=frame")
-
-
 
 
 @app.post("/api/camera/upload")
