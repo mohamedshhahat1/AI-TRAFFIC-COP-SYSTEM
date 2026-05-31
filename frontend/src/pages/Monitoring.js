@@ -59,7 +59,7 @@ function Monitoring() {
               <div key={name} className={`component-card ${data.status}`}>
                 <h4>{name.replace(/_/g, ' ')}</h4>
                 <span className={`status-dot ${data.status}`}>●</span>
-                <p>Avg: {data.avg}ms | P95: {data.p95}ms</p>
+                <p>Avg: {data.avg_ms ?? data.avg ?? 0}ms | P95: {data.p95_ms ?? data.p95 ?? 0}ms</p>
               </div>
             ))}
           </div>
