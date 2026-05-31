@@ -3,25 +3,14 @@
  * Auto-detects API URL: works in Coder proxy, localhost, and Docker
  */
 
-// Smart API URL detection
-function getApiBase() {
-  // If explicitly set in env
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  // In production/proxy: same origin on port 8000
-  const host = window.location.hostname;
-  const protocol = window.location.protocol;
-  return `${protocol}//${host}:8000/api`;
-}
+// API uses relative paths — works on any port/proxy (single-port deployment)
+const API_BASE = '/api';
 
 function getWsUrl() {
-  const host = window.location.hostname;
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${wsProtocol}//${host}:8000/ws/live`;
+  return `${wsProtocol}//${window.location.host}/ws/live`;
 }
 
-const API_BASE = getApiBase();
 const WS_URL = getWsUrl();
 
 // ==================== Core APIs ====================
