@@ -307,7 +307,7 @@ This means:
 | 🎯 Vehicle Tracking | DeepSORT |
 | ⚡ Speed Estimation | Calibrated pixel-to-world |
 | 🚨 Violation Detection | Multi-type engine |
-| 🔮 Accident Prediction | Time-To-Collision AI |
+| 🔮 Collision Risk Prediction | Physics-based TTC analysis |
 | 🚦 Congestion AI | Density + flow analysis |
 | 🏙️ Multi-Camera | Cross-camera ReID |
 
@@ -499,21 +499,108 @@ python scripts/train_model.py
 - **Roboflow** has free augmentation (flip, rotate, blur) that 3x your dataset
 - **Speed estimation** needs no labeled data — just calibrate `pixel_to_meter`
 
+---
+
+## 🖥️ Dashboard Features (Live)
+
+When you click **Start**, the dashboard shows:
+
+### 📷 Live Video Feed (MJPEG Stream)
+- Real-time annotated video with **bounding boxes**, **vehicle IDs**, **speed labels**, **violation markers**
+- Streamed via `/api/camera/feed` (MJPEG over HTTP)
+- Camera info: source name, resolution, FPS, connection status
+
+### 🎯 Vehicle Detection Statistics
+- Per-class counts: Cars, Trucks, Motorcycles, Buses, Pedestrians, Traffic Lights
+- Percentage bars showing distribution
+- All from real YOLO detections (not mocked)
+
+### ⚠️ Accident Risk Panel
+- Live risk level: LOW / MEDIUM / HIGH / IMMINENT
+- Risk score gauge (0-100%)
+- Recent collision warnings with involved vehicles + TTC
+- Pulses red on imminent danger
+
+### 🗺️ Top Congested Zones
+- Ranked zones from camera config
+- Congestion % calculated from: **vehicle density (40%)** + **speed reduction (40%)** + **road occupancy (20%)**
+- Color-coded status: 🟢 Free | 🟡 Moderate | 🟠 Heavy | 🔴 Gridlock
+
+### 🏗️ System Architecture Live
+- Frames Processed, Events Generated, API Requests (all real counters)
+- Avg Detection Confidence (from YOLO output)
+- System Uptime, AI Inferences count
+- Architecture flow visualization
+
+### 📁 Video Upload
+- Upload any `.mp4`/`.avi` traffic video from browser
+- Auto-starts AI processing after upload
+
+---
+
+## 📚 Academic Notes (Important for Presentation)
+
+### Terminology
+
+| Dashboard Shows | Correct Term | NOT |
+|---|---|---|
+| `Avg Detection Confidence: 85.3%` | Model's certainty in predictions | ❌ "Accuracy" (requires Ground Truth) |
+| `Collision Risk: HIGH` | Physics-based risk prediction | ❌ "AI predicts accidents" |
+| `Congestion: 85%` | Calculated from density + speed + occupancy | ❌ Random/mock values |
+
+### Collision Risk Prediction — How to Explain:
+
+> "We use **physics-assisted collision risk prediction** using vehicle trajectories and **Time-To-Collision (TTC)** analysis."
+
+This is:
+- ✅ **Predictive analytics** — forecasting based on current data
+- ✅ **Physics-based forecasting** — uses distance, relative velocity, trajectory extrapolation
+- ❌ NOT a Deep Learning model for accident prediction
+
+**TTC Formula:**
+```
+Relative Position: Δp = position_B - position_A
+Relative Velocity: Δv = velocity_B - velocity_A
+Time to Collision:  TTC = -dot(Δp, Δv) / dot(Δv, Δv)
+```
+
+**Risk Score Formula:**
+```
+Risk = (Proximity × 0.4) + (Convergence × 0.4) + (TTC_urgency × 0.4)
+     × Speed_amplifier (if combined speed > 100 km/h)
+```
+
+### Detection Confidence vs Accuracy:
+
+| Metric | Source | Meaning |
+|--------|--------|---------|
+| **Confidence** (shown in dashboard) | `detection.confidence` from YOLO | Model's certainty per detection |
+| **Accuracy (mAP)** (not shown) | `model.val(data=test_set.yaml)` | Requires labeled Ground Truth comparison |
+
+To get real mAP accuracy: run `python scripts/train_model.py` with a labeled dataset → training output includes mAP@0.5 and mAP@0.5:0.95.
+
 ## 📡 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/health` | System + AI Gateway health |
-| GET | `/api/violations/` | List violations |
+| GET | `/api/health` | System + AI Gateway + Event Bus health |
+| GET | `/api/violations/` | List violations (filterable) |
+| POST | `/api/violations/` | Create violation (Pydantic validated) |
 | GET | `/api/vehicles/` | Tracked vehicles |
-| GET | `/api/analytics/` | Statistics |
+| GET | `/api/analytics/` | Overall statistics |
+| GET | `/api/analytics/health` | Component health scores |
+| GET | `/api/analytics/metrics` | Performance (p50/p95/p99) |
+| GET | `/api/analytics/heatmap` | Congestion zones (real data) |
+| GET | `/api/analytics/logs` | Structured logs (filterable) |
 | GET | `/api/events/metrics` | Event Bus metrics |
-| GET | `/api/events/history` | Recent events |
-| GET | `/api/analytics/health` | System health score |
-| GET | `/api/analytics/metrics` | Performance metrics (p50/p95/p99) |
-| GET | `/api/analytics/metrics/prometheus` | Prometheus export |
-| GET | `/api/analytics/logs` | Recent structured logs |
-| GET | `/api/analytics/logs/stats` | Log statistics |
+| GET | `/api/events/history` | Recent events by topic |
+| GET | `/api/stats/requests` | Total API requests served |
+| GET | `/api/camera/stats` | Live FPS, objects, tracks, frame |
+| GET | `/api/camera/info` | Camera source, resolution, status |
+| GET | `/api/camera/feed` | **MJPEG video stream** (annotated) |
+| POST | `/api/camera/start` | Start AI processing |
+| POST | `/api/camera/stop` | Stop processing |
+| POST | `/api/camera/upload` | Upload traffic video |
 | WS | `/ws/live` | Real-time event stream |
 
 ---
@@ -558,7 +645,7 @@ AI Engine (9 modules):
 ├── tracking/               → DeepSORT Multi-Object Tracking
 ├── speed_estimation/       → Speed Calculation
 ├── violation_detection/    → Violation Engine (4 types)
-├── prediction/             → Accident & Congestion AI
+├── prediction/             → Collision Risk (Physics-based) & Congestion AI
 ├── smart_city/             → Multi-Camera & City Analytics
 ├── event_bus/              → Event-Driven Architecture (Pub/Sub)
 ├── api_bridge/             → API Gateway / Communication Layer
