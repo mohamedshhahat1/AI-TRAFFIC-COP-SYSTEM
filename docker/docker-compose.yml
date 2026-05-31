@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  # AI Traffic Cop Backend
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: traffic-cop-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/traffic_cop
+      - DEBUG=false
+    depends_on:
+      - db
+    volumes:
+      - ../data:/app/data
+      - ../models:/app/models
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: traffic-cop-db
+    environment:
+      POSTGRES_DB: traffic_cop
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Frontend (React)
+  frontend:
+    image: node:18-alpine
+    container_name: traffic-cop-frontend
+    working_dir: /app
+    command: sh -c "npm install && npm start"
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api
+    volumes:
+      - ../frontend:/app
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
