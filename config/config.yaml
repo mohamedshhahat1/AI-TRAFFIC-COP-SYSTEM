@@ -1,0 +1,115 @@
+# ============================================
+# AI Traffic Cop System Configuration
+# ============================================
+
+system:
+  name: "AI Traffic Cop System"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"
+
+# Camera Input Configuration
+camera:
+  source: "data/videos/sample.mp4"  # Video file, RTSP URL, or camera index (0)
+  rtsp_url: "rtsp://192.168.1.100:554/stream"
+  resolution:
+    width: 1280
+    height: 720
+  fps: 30
+  buffer_size: 10
+
+# YOLOv8 Detection Configuration
+detection:
+  model_path: "models/yolov8n.pt"
+  confidence_threshold: 0.5
+  iou_threshold: 0.45
+  device: "auto"  # auto, cpu, cuda:0
+  classes:
+    - car
+    - truck
+    - bus
+    - motorcycle
+    - person
+    - traffic light
+  img_size: 640
+
+# DeepSORT Tracking Configuration
+tracking:
+  max_age: 30
+  min_hits: 3
+  iou_threshold: 0.3
+  max_cosine_distance: 0.4
+  nn_budget: 100
+  embedder: "mobilenet"
+
+# Speed Estimation Configuration
+speed_estimation:
+  pixel_to_meter_ratio: 0.05  # Calibration: pixels to meters
+  fps: 30
+  speed_limit: 60  # km/h
+  smoothing_window: 5  # frames for averaging
+  min_track_length: 10  # minimum frames to estimate speed
+
+# Violation Detection Configuration
+violations:
+  speed:
+    enabled: true
+    limit: 60  # km/h
+    tolerance: 5  # km/h over limit before violation
+  red_light:
+    enabled: true
+    crossing_line_y: 400  # pixel position of stop line
+  lane:
+    enabled: true
+    lane_boundaries: [200, 400, 600, 800]  # pixel positions
+  parking:
+    enabled: true
+    max_stationary_time: 30  # seconds
+    forbidden_zones: []  # list of polygon coordinates
+
+# Decision Engine Configuration
+decision:
+  severity_thresholds:
+    low: 0.3
+    medium: 0.6
+    high: 0.8
+  false_positive_threshold: 0.7
+  min_confidence: 0.6
+
+# Backend Configuration
+backend:
+  host: "0.0.0.0"
+  port: 8000
+  database:
+    url: "postgresql://postgres:password@localhost:5432/traffic_cop"
+    echo: false
+    pool_size: 10
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+
+# Alert Configuration
+alerts:
+  email:
+    enabled: false
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    sender: "traffic-cop@example.com"
+    recipients:
+      - "admin@example.com"
+  sms:
+    enabled: false
+    provider: "twilio"
+    from_number: "+1234567890"
+    to_numbers:
+      - "+0987654321"
+  push:
+    enabled: false
+    firebase_credentials: "config/firebase-credentials.json"
+
+# Dashboard Configuration
+dashboard:
+  host: "0.0.0.0"
+  port: 8080
+  refresh_rate: 1000  # milliseconds
+  max_violations_display: 50
