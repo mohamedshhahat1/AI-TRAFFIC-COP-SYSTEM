@@ -16,7 +16,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 try:
     from ai_engine.monitoring.logger import SystemLogger
     logger = SystemLogger("main")
@@ -210,6 +210,22 @@ async def camera_info():
     if video_processor:
         return video_processor.camera_info
     return {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
+
+
+@app.get("/api/camera/feed")
+async def video_feed():
+    """MJPEG video stream with annotated frames (bounding boxes, IDs, speed)."""
+    import time
+    
+    def generate():
+        while True:
+            if video_processor and video_processor._latest_frame:
+                frame = video_processor._latest_frame
+                yield (b"--frame\r\n"
+                       b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
+            time.sleep(0.1)  # ~10 FPS stream
+    
+    return StreamingResponse(generate(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 
 

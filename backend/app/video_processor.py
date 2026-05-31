@@ -28,6 +28,7 @@ class VideoProcessor:
         self._loop = None
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
         self.camera_info = {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
+        self._latest_frame = None  # Latest annotated frame (JPEG bytes)
         self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
     
     def start(self, source: str = "data/videos/traffic.mp4"):
@@ -123,6 +124,13 @@ class VideoProcessor:
                 "detection_counts": self.detection_counts,
             }
             
+            # Annotate frame with bounding boxes, IDs, speed, violations
+            annotated = self._annotate_frame(frame, results)
+            
+            # Encode as JPEG for streaming
+            _, jpeg = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 70])
+            self._latest_frame = jpeg.tobytes()
+            
             # Broadcast to WebSocket clients
             self._send_update({
                 "type": "frame_update",
@@ -162,6 +170,77 @@ class VideoProcessor:
         cap.release()
         self._running = False
     
+    def _annotate_frame(self, frame, results):
+        """Draw bounding boxes, IDs, speed, and violations on frame."""
+        annotated = frame.copy()
+        
+        # Get tracks and violations
+        tracks = results.get("tracks", [])
+        violations = results.get("violations", [])
+        violation_track_ids = set()
+        
+        # Collect violation track IDs
+        raw_violations = violations
+        if isinstance(raw_violations, dict):
+            raw_violations = raw_violations.get("items", [])
+        for v in raw_violations:
+            tid = v.track_id if hasattr(v, 'track_id') else v.get('track_id', -1)
+            violation_track_ids.add(tid)
+        
+        # Draw each tracked vehicle
+        for track in tracks:
+            x1, y1, x2, y2 = track.bbox
+            speed = track.current_speed
+            tid = track.track_id
+            cls = track.class_name
+            
+            # Color: red if violating, green otherwise
+            is_violating = tid in violation_track_ids
+            color = (0, 0, 255) if is_violating else (0, 255, 0)
+            
+            # Bounding box
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+            
+            # Label: Class #ID
+            label = f"{cls} #{tid}"
+            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+            cv2.rectangle(annotated, (x1, y1 - th - 8), (x1 + tw + 4, y1), color, -1)
+            cv2.putText(annotated, label, (x1 + 2, y1 - 4),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            
+            # Speed label
+            speed_label = f"{speed:.0f} km/h"
+            cv2.putText(annotated, speed_label, (x1, y2 + 16),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+            
+            # Violation label
+            if is_violating:
+                cv2.putText(annotated, "!! VIOLATION", (x1, y2 + 32),
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+        
+        # Draw violation alerts on top
+        y_offset = 30
+        for v in raw_violations[:3]:
+            v_type = v.type.value if hasattr(v, 'type') else v.get('type', '')
+            v_tid = v.track_id if hasattr(v, 'track_id') else v.get('track_id', '?')
+            text = f"!! {v_type}: Vehicle #{v_tid}"
+            cv2.putText(annotated, text, (10, y_offset),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            y_offset += 25
+        
+        # Info bar at bottom
+        h, w = annotated.shape[:2]
+        cv2.rectangle(annotated, (0, h - 30), (w, h), (0, 0, 0), -1)
+        info = f"AI Traffic Cop | Vehicles: {len(tracks)} | FPS: {self.stats.get('fps', 0)} | Frame: {self.stats.get('frame', 0)}"
+        cv2.putText(annotated, info, (10, h - 8),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+        
+        return annotated
+
+    def get_frame(self):
+        """Get latest annotated frame as JPEG bytes."""
+        return self._latest_frame
+
     def _send_update(self, data):
         """Thread-safe broadcast to WebSocket clients."""
         if self._loop and self._loop.is_running():

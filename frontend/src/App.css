@@ -499,3 +499,41 @@ tr:hover { background: rgba(255,255,255,0.02); }
   align-items: center;
   gap: 4px;
 }
+
+/* Video Stream */
+.video-stream {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+
+.feed-active {
+  position: relative;
+}
+
+.feed-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+  border-radius: 8px 8px 0 0;
+}
+
+.feed-stats-overlay {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.feed-stats-overlay span {
+  background: rgba(0,0,0,0.5);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
