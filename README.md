@@ -54,7 +54,7 @@ Built with **production-grade patterns** used by companies like Uber, Tesla, and
                                   │
                                   ▼
         ┌────────────────────────────────────────────┐
-        │       AI Prediction Layer                  │
+        │       Collision Risk & Congestion Analysis                  │
         │  Accident Risk | Congestion Forecast       │
         └─────────────┬──────────────────────────────┘
                                   │
@@ -101,7 +101,7 @@ AI-Traffic-Cop-System/
 │   │   ├── lane_violation.py        # Illegal lane changes
 │   │   ├── parking_violation.py     # Illegal parking
 │   │   └── violation_engine.py      # Central orchestrator
-│   ├── prediction/                  # 🔮 AI Prediction Layer
+│   ├── prediction/                  # 🔮 Collision Risk & Congestion Analysis
 │   │   ├── accident_predictor.py    # Collision risk (TTC)
 │   │   └── congestion_analyzer.py   # Traffic density AI
 │   ├── smart_city/                  # 🏙️ Smart City

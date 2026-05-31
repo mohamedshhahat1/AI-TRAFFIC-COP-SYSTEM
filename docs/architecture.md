@@ -56,8 +56,8 @@
                                   │
                                   ▼
                     ┌────────────────────────────┐
-                    │   AI Prediction Layer      │
-                    │ - Accident Prediction      │
+                    │   Collision Risk & Congestion Analysis      │
+                    │ - Collision Risk Prediction (TTC)      │
                     │ - Traffic Congestion AI    │
                     │ - Dangerous Driving Alert  │
                     └─────────────┬──────────────┘
@@ -225,7 +225,7 @@ Features:
 - Speed, red light, lane, parking violations
 - Evidence snapshot capture
 
-### 5. AI Prediction (`ai_engine/prediction/`)
+### 5. Collision Risk & Congestion (`ai_engine/prediction/`)
 - Accident risk via Time-To-Collision (TTC)
 - Congestion level forecasting
 - Dangerous driving pattern detection

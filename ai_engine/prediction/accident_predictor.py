@@ -1,5 +1,5 @@
 """
-Accident Prediction Module
+Collision Risk Prediction (TTC) Module
 Uses vehicle trajectories, speeds, and proximity to predict potential collisions.
 """
 
