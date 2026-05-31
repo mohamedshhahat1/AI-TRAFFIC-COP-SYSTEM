@@ -8,6 +8,7 @@ import { fetchStats, fetchViolations, fetchHealth, connectWebSocket } from '../s
 import DetectionStats from '../components/DetectionStats';
 import AccidentRiskPanel from '../components/AccidentRiskPanel';
 import TrafficHeatmap from '../components/TrafficHeatmap';
+import SystemArchLive from '../components/SystemArchLive';
 
 function Dashboard() {
   const [stats, setStats] = useState({});
@@ -77,6 +78,8 @@ function Dashboard() {
       </div>
       
       <StatsCards stats={stats} />
+      
+      <SystemArchLive />
       
       <div className="grid-2col">
         <LiveCameraFeed />
