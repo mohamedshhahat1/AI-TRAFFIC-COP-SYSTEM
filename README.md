@@ -1,6 +1,6 @@
 # 🚔 AI Traffic Cop System
 
-> **Smart Traffic Enforcement & Analytics System** powered by AI, Computer Vision, and Deep Learning
+> **Smart Traffic Enforcement & Analytics System** — Event-Driven AI Architecture
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Detection-green.svg)
@@ -9,20 +9,21 @@
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB.svg)
 ![Flutter](https://img.shields.io/badge/Flutter-Mobile-02569B.svg)
 ![Docker](https://img.shields.io/badge/Docker-Deploy-2496ED.svg)
+![Event-Driven](https://img.shields.io/badge/Architecture-Event--Driven-red.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ---
 
 ## 🧠 Project Overview
 
-The **AI Traffic Cop System** is an intelligent real-time surveillance system that uses **computer vision** and **AI** to:
+The **AI Traffic Cop System** is an intelligent real-time surveillance system that uses **computer vision**, **AI**, and **event-driven architecture** to:
 - Monitor road traffic in real-time
 - Detect traffic violations automatically
 - Predict accidents before they happen
 - Analyze city-wide congestion patterns
-- Generate automated enforcement reports
+- Alert authorities through multiple channels
 
-Replaces traditional manual traffic monitoring with a **fully automated AI-powered pipeline**.
+Built with **production-grade patterns** used by companies like Uber, Tesla, and Google.
 
 ---
 
@@ -35,85 +36,47 @@ Replaces traditional manual traffic monitoring with a **fully automated AI-power
                     └─────────────┬──────────────┘
                                   │
                                   ▼
-                    ┌────────────────────────────┐
-                    │  Frame Preprocessing Layer │
-                    │ (Resize / Normalize / FPS) │
-                    └─────────────┬──────────────┘
-                                  │
-                                  ▼
         ┌────────────────────────────────────────────┐
-        │        AI Vision Layer (Detection)         │
-        │        YOLOv8 Object Detection             │
-        │  - Vehicles 🚗 🚛 🏍️                      │
-        │  - Traffic Lights 🚦                       │
-        │  - Pedestrians 🚶                          │
+        │        AI Vision Layer (YOLOv8)            │
+        │  Vehicles 🚗 | Lights 🚦 | People 🚶      │
         └─────────────┬──────────────────────────────┘
                                   │
                                   ▼
         ┌────────────────────────────────────────────┐
-        │         Tracking Layer                     │
-        │   DeepSORT Multi-Object Tracking           │
-        │   → Assign Unique Vehicle IDs              │
-        │   → Track Movement Paths                   │
+        │   Tracking (DeepSORT) → Speed Estimation   │
         └─────────────┬──────────────────────────────┘
                                   │
                                   ▼
         ┌────────────────────────────────────────────┐
-        │     Motion & Speed Estimation Layer        │
-        │   - Pixel displacement measurement         │
-        │   - Real-world speed (km/h)                │
-        │   - Speed limit comparison                 │
+        │       Violation Detection Engine           │
+        │  Speed | Red Light | Lane | Parking        │
         └─────────────┬──────────────────────────────┘
                                   │
                                   ▼
         ┌────────────────────────────────────────────┐
-        │     Violation Detection Engine             │
-        │  🔴 Speed Violation                        │
-        │  🚦 Red Light Violation                    │
-        │  🛣️ Lane Violation                         │
-        │  🚫 Illegal Parking                        │
+        │       AI Prediction Layer                  │
+        │  Accident Risk | Congestion Forecast       │
         └─────────────┬──────────────────────────────┘
                                   │
                                   ▼
         ┌────────────────────────────────────────────┐
-        │     Decision & Severity Engine             │
-        │  - Classify violation severity             │
-        │  - Filter false positives                  │
-        │  - Prioritize critical violations          │
+        │       Smart City Integration               │
+        │  Multi-Camera | City Analytics             │
         └─────────────┬──────────────────────────────┘
                                   │
                                   ▼
-                    ┌────────────────────────────┐
-                    │   AI Prediction Layer      │
-                    │ - Accident Prediction      │
-                    │ - Traffic Congestion AI    │
-                    │ - Dangerous Driving Alert  │
-                    └─────────────┬──────────────┘
-                                  │
-                                  ▼
-                    ┌────────────────────────────┐
-                    │ Smart City Integration     │
-                    │ - Multi-camera fusion      │
-                    │ - City-wide analytics      │
-                    │ - Environmental impact     │
-                    └─────────────┬──────────────┘
-                                  │
-                                  ▼
-        ┌────────────────────────────────────────────┐
-        │            Backend API Layer               │
-        │   FastAPI Server + WebSocket               │
-        │   - Store violations in DB                 │
-        │   - REST API for all services              │
-        └─────────────┬──────────────────────────────┘
-                                  │
-          ┌───────────────────────┼───────────────────────┐
-          ▼                       ▼                       ▼
-┌──────────────────┐   ┌────────────────────┐  ┌────────────────────┐
-│   Database       │   │   Dashboard UI     │  │  Alert System      │
-│ PostgreSQL /     │   │ React + Flutter    │  │ SMS / Email / Push │
-│ SQLite           │   │ - Live Monitoring  │  │ - Real-time alerts │
-│                  │   │ - Statistics       │  │ - Webhooks         │
-└──────────────────┘   └────────────────────┘  └────────────────────┘
+    ┌─────────────────────────────────────────────────────┐
+    │         🔥 EVENT BUS (Pub/Sub Architecture)         │
+    │                                                     │
+    │   violation.* | accident.* | congestion.* |         │
+    │   tracking.* | system.* | camera.*                  │
+    └────────┬──────────────┬──────────────┬──────────────┘
+             │              │              │
+             ▼              ▼              ▼
+    ┌────────────────┐ ┌──────────┐ ┌────────────────┐
+    │  API Gateway   │ │  Alerts  │ │   Dashboard    │
+    │ (Backend API)  │ │ SMS/Email│ │  (WebSocket)   │
+    └────────────────┘ └──────────┘ └────────────────┘
 ```
 
 ---
@@ -123,34 +86,41 @@ Replaces traditional manual traffic monitoring with a **fully automated AI-power
 ```
 AI-Traffic-Cop-System/
 │
-├── ai_engine/                    # 🧠 Core AI Intelligence
+├── ai_engine/                       # 🧠 Core AI Intelligence
 │   ├── detection/
-│   │   ├── yolo_detector.py     # YOLOv8 object detection
-│   │   └── model_loader.py      # Model management
+│   │   ├── yolo_detector.py         # YOLOv8 object detection
+│   │   └── model_loader.py          # Model management
 │   ├── tracking/
-│   │   ├── deep_sort_tracker.py # DeepSORT tracking
-│   │   └── object_tracker.py    # Track data structures
+│   │   ├── deep_sort_tracker.py     # DeepSORT tracking
+│   │   └── object_tracker.py        # Track data structures
 │   ├── speed_estimation/
-│   │   └── speed_calculator.py  # Speed measurement
+│   │   └── speed_calculator.py      # Speed measurement
 │   ├── violation_detection/
-│   │   ├── speed_violation.py   # Speed limit detection
-│   │   ├── red_light.py         # Red light running
-│   │   ├── lane_violation.py    # Illegal lane changes
-│   │   ├── parking_violation.py # Illegal parking
-│   │   └── violation_engine.py  # Central orchestrator
-│   ├── prediction/              # 🔮 AI Prediction Layer
-│   │   ├── accident_predictor.py
-│   │   └── congestion_analyzer.py
-│   ├── smart_city/              # 🏙️ Smart City Integration
-│   │   ├── multi_camera_fusion.py
-│   │   └── city_analytics.py
-│   ├── pipeline.py              # Main AI pipeline
-│   └── utils.py                 # Utility functions
+│   │   ├── speed_violation.py       # Speed limit detection
+│   │   ├── red_light.py             # Red light running
+│   │   ├── lane_violation.py        # Illegal lane changes
+│   │   ├── parking_violation.py     # Illegal parking
+│   │   └── violation_engine.py      # Central orchestrator
+│   ├── prediction/                  # 🔮 AI Prediction Layer
+│   │   ├── accident_predictor.py    # Collision risk (TTC)
+│   │   └── congestion_analyzer.py   # Traffic density AI
+│   ├── smart_city/                  # 🏙️ Smart City
+│   │   ├── multi_camera_fusion.py   # Cross-camera tracking
+│   │   └── city_analytics.py        # City-wide insights
+│   ├── event_bus/                   # 🔥 Event-Driven System
+│   │   ├── event_manager.py         # Central Event Bus
+│   │   └── event_types.py           # Typed event factory
+│   ├── api_bridge/                  # 🌐 API Gateway Layer
+│   │   ├── inference_service.py     # Sync/async inference
+│   │   ├── message_broker.py        # Cross-service comms
+│   │   └── api_gateway.py           # Single entry point
+│   ├── pipeline.py                  # Main AI pipeline
+│   └── utils.py                     # Utility functions
 │
-├── backend/                     # ⚙️ API Server
+├── backend/                         # ⚙️ API Server
 │   ├── app/
-│   │   ├── main.py              # FastAPI entry point
-│   │   ├── config.py            # Settings
+│   │   ├── main.py                  # FastAPI + Event Bus integration
+│   │   ├── config.py
 │   │   ├── routes/
 │   │   │   ├── violations.py
 │   │   │   ├── vehicles.py
@@ -161,67 +131,49 @@ AI-Traffic-Cop-System/
 │   │   └── models/
 │   │       ├── violation_model.py
 │   │       └── vehicle_model.py
-│   ├── database/
-│   │   └── db_connection.py
-│   └── requirements.txt
+│   └── database/
+│       └── db_connection.py
 │
-├── frontend/                    # 📊 Web Dashboard (React)
+├── frontend/                        # 📊 Web Dashboard (React)
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── LiveCameraFeed.js
-│   │   │   ├── ViolationTable.js
-│   │   │   └── StatsCards.js
 │   │   ├── pages/
-│   │   │   ├── Dashboard.js
-│   │   │   └── Violations.js
 │   │   ├── services/
-│   │   │   └── api.js
 │   │   └── App.js
 │   └── package.json
 │
-├── mobile_app/                  # 📱 Mobile App (Flutter)
+├── mobile_app/                      # 📱 Mobile App (Flutter)
 │   ├── lib/
 │   │   ├── screens/
-│   │   │   ├── home.dart
-│   │   │   └── violations.dart
 │   │   ├── services/
-│   │   │   └── api_service.dart
-│   │   ├── widgets/
 │   │   └── main.dart
 │   └── pubspec.yaml
 │
-├── data/                        # 📦 Data
-│   ├── videos/
-│   ├── images/
-│   └── annotations/
-│
-├── models/                      # 🧠 AI Models
-│   └── README.md
-│
-├── configs/                     # ⚙️ Configuration
+├── configs/                         # ⚙️ Configuration
 │   ├── settings.yaml
 │   ├── camera_config.yaml
 │   └── thresholds.yaml
 │
-├── scripts/                     # 🚀 Automation
-│   ├── run_pipeline.py
+├── scripts/                         # 🚀 Automation
+│   ├── run_pipeline.py              # Uses AIGateway
 │   ├── train_model.py
 │   └── export_model.py
 │
-├── docs/                        # 📄 Documentation
-│   ├── architecture.md
-│   ├── api_docs.md
-│   └── diagrams/
+├── docs/                            # 📄 Documentation
+│   ├── architecture.md              # Full architecture diagram
+│   └── api_docs.md                  # API reference
 │
-├── tests/                       # 🧪 Tests
+├── tests/                           # 🧪 Tests
 │   ├── test_detection.py
 │   ├── test_tracking.py
 │   └── test_api.py
 │
-├── docker/                      # 🐳 Deployment
+├── docker/                          # 🐳 Deployment
 │   ├── Dockerfile
 │   └── docker-compose.yml
 │
+├── data/                            # 📦 Data
+├── models/                          # 🧠 AI Models
 ├── requirements.txt
 ├── LICENSE
 └── README.md
@@ -229,35 +181,91 @@ AI-Traffic-Cop-System/
 
 ---
 
+## 🔥 Event-Driven Architecture
+
+The system uses a **production-grade pub/sub Event Bus** — no direct calls between components:
+
+```python
+# AI detects violation → emits event
+TrafficEvent.speed_violation(bus, track_id=5, speed=95, limit=60)
+
+# Multiple consumers react INDEPENDENTLY:
+bus.on("violation.*", save_to_database)        # Backend
+bus.on("violation.*", broadcast_websocket)     # Dashboard  
+bus.on("violation.speed", send_sms_alert)      # Alerts
+bus.on("accident.risk", emergency_dispatch)    # Emergency
+```
+
+### Event Topics
+
+| Topic | Trigger | Priority |
+|-------|---------|----------|
+| `violation.speed` | Vehicle exceeds limit | HIGH |
+| `violation.red_light` | Red light crossed | CRITICAL |
+| `violation.lane` | Illegal lane change | HIGH |
+| `accident.risk` | Collision predicted | CRITICAL |
+| `accident.imminent` | TTC < 1.5 seconds | EMERGENCY |
+| `congestion.change` | Traffic level shifts | NORMAL |
+| `tracking.update` | Vehicle count update | LOW |
+| `system.error` | Component failure | CRITICAL |
+
+### Event Bus Features
+- ⚡ Priority levels (LOW → EMERGENCY)
+- 🎯 Wildcard matching (`violation.*`)
+- 🔁 Event replay for late subscribers
+- 💀 Dead letter queue (retry failed events)
+- 🛡️ Rate limiting per topic
+- 🔌 Middleware/interceptor support
+- 📈 Built-in metrics & monitoring
+
+---
+
+## 🌐 API Gateway Pattern
+
+```
+Backend → AIGateway → InferenceService → AI Pipeline → Results
+                   → Event Bus → All subscribers
+```
+
+The backend ONLY interacts with `AIGateway` — clean separation:
+
+```python
+from ai_engine import AIGateway
+
+gateway = AIGateway(config)
+gateway.start()
+
+# Single call does everything
+results = gateway.process_frame(frame)
+
+# Subscribe to live events
+gateway.on_violation(handle_violation)
+gateway.on_accident_risk(send_emergency)
+```
+
+---
+
 ## 🚀 Features
 
-### Core AI Features
-| Feature | Description |
-|---------|-------------|
-| 🎥 Real-time Detection | YOLOv8 vehicle/pedestrian/traffic light detection |
-| 🎯 Multi-Object Tracking | DeepSORT persistent vehicle IDs |
-| ⚡ Speed Estimation | Real-time speed calculation with calibration |
-| 🚨 Violation Detection | Speed, red light, lane, parking violations |
-| 🔮 Accident Prediction | TTC-based collision risk analysis |
-| 🚦 Congestion Analysis | Real-time traffic density & flow monitoring |
+### AI Features
+| Feature | Technology |
+|---------|-----------|
+| 🎥 Real-time Detection | YOLOv8 |
+| 🎯 Vehicle Tracking | DeepSORT |
+| ⚡ Speed Estimation | Calibrated pixel-to-world |
+| 🚨 Violation Detection | Multi-type engine |
+| 🔮 Accident Prediction | Time-To-Collision AI |
+| 🚦 Congestion AI | Density + flow analysis |
+| 🏙️ Multi-Camera | Cross-camera ReID |
 
-### Smart City Features
+### Architecture Features
 | Feature | Description |
 |---------|-------------|
-| 📷 Multi-Camera Fusion | Cross-camera vehicle tracking |
-| 🌍 City-Wide Analytics | Traffic patterns & peak hours |
-| 🌱 Environmental Impact | CO2 estimation & air quality |
-| 📊 Trend Prediction | Congestion forecasting |
-
-### System Features
-| Feature | Description |
-|---------|-------------|
-| 📡 REST API | Full FastAPI backend |
-| 📊 Web Dashboard | React.js real-time UI |
-| 📱 Mobile App | Flutter cross-platform |
-| 🔔 Alert System | Email, SMS, Push, Webhook |
+| 🔥 Event-Driven | Pub/sub like Uber/Tesla |
+| 🌐 API Gateway | Single entry point, scalable |
+| 📡 WebSocket | Real-time dashboard updates |
 | 🐳 Docker | One-click deployment |
-| 🗄️ Database | PostgreSQL / SQLite |
+| 🧪 Tests | Unit test coverage |
 
 ---
 
@@ -265,47 +273,37 @@ AI-Traffic-Cop-System/
 
 | Layer | Technology |
 |-------|-----------|
-| Object Detection | YOLOv8 (Ultralytics) |
-| Object Tracking | DeepSORT |
-| Computer Vision | OpenCV |
-| ML Framework | PyTorch |
+| Detection | YOLOv8 (Ultralytics) |
+| Tracking | DeepSORT |
+| Vision | OpenCV |
+| ML | PyTorch |
+| Event System | Custom Event Bus |
+| API Gateway | Custom InferenceService |
 | Backend | FastAPI + SQLAlchemy |
 | Database | PostgreSQL / SQLite |
-| Frontend | React.js + Chart.js |
+| Frontend | React.js |
 | Mobile | Flutter |
-| Deployment | Docker + Docker Compose |
-| Alerts | SMTP, Twilio, Firebase |
+| Deploy | Docker Compose |
 
 ---
 
 ## ⚙️ Installation
-
-### Prerequisites
-- Python 3.9+
-- Node.js 18+ (for frontend)
-- Flutter SDK (for mobile)
-- Docker (optional)
-
-### Quick Start
 
 ```bash
 # Clone
 git clone https://github.com/mohamedshhahat1/AI-TRAFFIC-COP-SYSTEM.git
 cd AI-TRAFFIC-COP-SYSTEM
 
-# Install Python dependencies
+# Install
 pip install -r requirements.txt
 
-# Run AI pipeline
+# Run full pipeline (event-driven)
 python scripts/run_pipeline.py --source data/videos/sample.mp4 --display
 
 # Run API server
 uvicorn backend.app.main:app --reload --port 8000
 
-# Run frontend
-cd frontend && npm install && npm start
-
-# Or use Docker (one-click)
+# Docker (one-click)
 cd docker && docker-compose up --build
 ```
 
@@ -315,28 +313,13 @@ cd docker && docker-compose up --build
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/health` | Health check |
+| GET | `/api/health` | System + AI Gateway health |
 | GET | `/api/violations/` | List violations |
-| GET | `/api/vehicles/` | List vehicles |
+| GET | `/api/vehicles/` | Tracked vehicles |
 | GET | `/api/analytics/` | Statistics |
-| GET | `/api/analytics/congestion` | Congestion data |
-| WS | `/ws/live` | Live data stream |
-
-📖 Full docs: [API Documentation](docs/api_docs.md)
-
----
-
-## 🐳 Docker Deployment
-
-```bash
-cd docker
-docker-compose up --build
-```
-
-Services:
-- **API**: http://localhost:8000
-- **Dashboard**: http://localhost:3000
-- **Database**: localhost:5432
+| GET | `/api/events/metrics` | Event Bus metrics |
+| GET | `/api/events/history` | Recent events |
+| WS | `/ws/live` | Real-time event stream |
 
 ---
 
@@ -348,26 +331,15 @@ pytest tests/ -v
 
 ---
 
-## 🤝 Contributing
-
-1. Fork the repo
-2. Create feature branch: `git checkout -b feature/amazing`
-3. Commit: `git commit -m 'Add amazing feature'`
-4. Push: `git push origin feature/amazing`
-5. Open a Pull Request
-
----
-
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE)
+MIT License — see [LICENSE](LICENSE)
 
 ---
 
 ## 👤 Author
 
-**Mohamed Shahat**
-- GitHub: [@mohamedshhahat1](https://github.com/mohamedshhahat1)
+**Mohamed Shahat** — [@mohamedshhahat1](https://github.com/mohamedshhahat1)
 
 ---
 
