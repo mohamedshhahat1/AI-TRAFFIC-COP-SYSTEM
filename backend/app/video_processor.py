@@ -27,6 +27,7 @@ class VideoProcessor:
         self._source = None
         self._loop = None
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
+        self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
     
     def start(self, source: str = "data/videos/traffic.mp4"):
         """Start processing video in background thread."""
@@ -91,6 +92,15 @@ class VideoProcessor:
             tracks_val = stats.get("active_tracks", 0) or results.get("tracking", {}).get("active_vehicles", 0)
             violations_val = stats.get("new_violations", 0) or results.get("violations", {}).get("new_count", 0)
             
+            # Count detections by class
+            raw_dets = results.get("detections", [])
+            if isinstance(raw_dets, dict):
+                raw_dets = raw_dets.get("objects", [])
+            for d in raw_dets:
+                cls_name = d.class_name if hasattr(d, "class_name") else d.get("class", "")
+                if cls_name in self.detection_counts:
+                    self.detection_counts[cls_name] += 1
+
             self.stats = {
                 "fps": round(current_fps, 1),
                 "objects": detections,
@@ -99,6 +109,7 @@ class VideoProcessor:
                 "violations": violations_val,
                 "congestion": stats.get("congestion_level", "free") or results.get("congestion", {}).get("level", "free"),
                 "health_score": stats.get("health_score", 100),
+                "detection_counts": self.detection_counts,
             }
             
             # Broadcast to WebSocket clients

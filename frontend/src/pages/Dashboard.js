@@ -5,12 +5,14 @@ import ViolationTable from '../components/ViolationTable';
 import HealthIndicator from '../components/HealthIndicator';
 import EventFeed from '../components/EventFeed';
 import { fetchStats, fetchViolations, fetchHealth, connectWebSocket } from '../services/api';
+import DetectionStats from '../components/DetectionStats';
 
 function Dashboard() {
   const [stats, setStats] = useState({});
   const [violations, setViolations] = useState([]);
   const [health, setHealth] = useState({ status: 'loading', score: 0 });
   const [liveEvents, setLiveEvents] = useState([]);
+  const [detectionCounts, setDetectionCounts] = useState({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -25,11 +27,23 @@ function Dashboard() {
     };
     
     loadData();
-    const interval = setInterval(loadData, 5000);
+    const interval = setInterval(async () => {
+      loadData();
+      // Fetch detection counts
+      try {
+        const res = await fetch('http://localhost:8000/api/camera/stats');
+        const data = await res.json();
+        if (data.detection_counts) setDetectionCounts(data.detection_counts);
+      } catch(e) {}
+    }, 2000);
 
     // Connect to live event stream
     const ws = connectWebSocket((event) => {
       setLiveEvents(prev => [event, ...prev].slice(0, 20));
+      // Update detection counts from frame updates
+      if (event.type === 'frame_update' && event.data?.detection_counts) {
+        setDetectionCounts(event.data.detection_counts);
+      }
       // Auto-refresh on new violation
       if (event.type === 'violation') {
         loadData();
@@ -55,6 +69,8 @@ function Dashboard() {
         <LiveCameraFeed />
         <EventFeed events={liveEvents} />
       </div>
+      
+      <DetectionStats counts={detectionCounts} />
       
       <ViolationTable violations={violations} title="Recent Violations" />
     </div>
