@@ -1,0 +1,16 @@
+# Camera Configuration
+cameras:
+  - id: "cam_01"
+    location: "Main Street Intersection"
+    source: "rtsp://192.168.1.100:554/stream1"
+    coordinates: [30.0444, 31.2357]
+    
+  - id: "cam_02"
+    location: "Highway Exit 5"
+    source: "rtsp://192.168.1.101:554/stream1"
+    coordinates: [30.0500, 31.2400]
+
+  - id: "cam_03"
+    location: "School Zone - Al Azhar"
+    source: "rtsp://192.168.1.102:554/stream1"
+    coordinates: [30.0455, 31.2380]
