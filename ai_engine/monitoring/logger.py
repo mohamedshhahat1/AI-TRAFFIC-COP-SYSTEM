@@ -130,6 +130,7 @@ class SystemLogger:
             level="INFO",
             format="<green>{time:HH:mm:ss}</green> | <level>{level:8}</level> | <cyan>{extra[component]:12}</cyan> | {message}",
             colorize=True,
+            filter=lambda record: record["extra"].setdefault("component", "system") or True,
         )
         
         # File sink (JSON structured, rotated)
@@ -140,6 +141,7 @@ class SystemLogger:
             rotation="50 MB",
             retention="30 days",
             compression="gz",
+            filter=lambda record: record["extra"].setdefault("component", "system") or True,
         )
         
         # Error-only file
@@ -149,6 +151,7 @@ class SystemLogger:
             format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {extra[component]} | {message}",
             rotation="10 MB",
             retention="90 days",
+            filter=lambda record: record["extra"].setdefault("component", "system") or True,
         )
     
     def _log(self, level: LogLevel, message: str, **kwargs):

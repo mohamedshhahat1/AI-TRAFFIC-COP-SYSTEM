@@ -20,8 +20,9 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 try:
+    from ai_engine.monitoring.logger import SystemLogger
     logger = SystemLogger("inference_service")
-except ImportError:
+except (ImportError, Exception):
     from loguru import logger
 import time
 import uuid
