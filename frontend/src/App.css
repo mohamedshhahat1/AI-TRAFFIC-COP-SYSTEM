@@ -642,3 +642,29 @@ tr:hover { background: rgba(255,255,255,0.02); }
 .results-academic { padding: 16px 20px; font-size: 0.85rem; line-height: 1.8; }
 .results-academic p { margin-bottom: 8px; }
 .results-academic code { background: var(--dark); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+
+/* Technology Stack */
+.tech-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  padding: 16px 20px;
+}
+
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--dark);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+
+.tech-icon { font-size: 1.3rem; }
+
+.tech-info { display: flex; flex-direction: column; }
+
+.tech-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+.tech-value { font-size: 0.85rem; font-weight: 600; color: #fff; }

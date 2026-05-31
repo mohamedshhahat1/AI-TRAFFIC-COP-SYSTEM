@@ -143,6 +143,38 @@ function Results() {
             </div>
           </div>
 
+
+          {/* Technology Stack */}
+          <div className="panel">
+            <div className="panel-header">
+              <h2>🛠️ Technology Stack</h2>
+            </div>
+            <div className="tech-stack-grid">
+              {[
+                { label: 'Detection', value: 'YOLOv8 (Ultralytics)', icon: '👁️' },
+                { label: 'Tracking', value: 'DeepSORT', icon: '🎯' },
+                { label: 'Speed Estimation', value: 'Pixel-to-World Calibration', icon: '⚡' },
+                { label: 'Prediction', value: 'Physics-Based TTC Engine', icon: '🔮' },
+                { label: 'Backend', value: 'FastAPI + SQLAlchemy', icon: '⚙️' },
+                { label: 'Frontend', value: 'React.js', icon: '📊' },
+                { label: 'Mobile App', value: 'Flutter', icon: '📱' },
+                { label: 'Event Architecture', value: 'Custom Event Bus (Pub/Sub)', icon: '🔥' },
+                { label: 'API Gateway', value: 'Custom InferenceService', icon: '🌐' },
+                { label: 'Monitoring', value: 'Prometheus-Compatible Metrics', icon: '📈' },
+                { label: 'Computer Vision', value: 'OpenCV + PyTorch', icon: '🖼️' },
+                { label: 'Deployment', value: 'Docker + Docker Compose', icon: '🐳' },
+              ].map((tech, i) => (
+                <div key={i} className="tech-item">
+                  <span className="tech-icon">{tech.icon}</span>
+                  <div className="tech-info">
+                    <span className="tech-label">{tech.label}</span>
+                    <span className="tech-value">{tech.value}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Academic Note */}
           <div className="panel results-note-panel">
             <div className="panel-header">
