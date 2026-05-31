@@ -539,6 +539,51 @@ pytest tests/ -v
 
 ---
 
+---
+
+## 📊 Project Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Total Files** | 98 |
+| **Total Lines of Code** | 9,331 |
+| **Total Commits** | 50 |
+| **Architecture Layers** | 13 |
+
+### By Language
+
+| Language | Files | Lines |
+|----------|-------|-------|
+| Python | 56 | 5,931 |
+| Dart (Flutter) | 9 | 1,144 |
+| JavaScript (React) | 10 | 725 |
+| CSS | 1 | 268 |
+| Markdown/Docs | 4 | 903 |
+| YAML/Config | 5 | — |
+| Docker | 2 | — |
+| HTML | 1 | — |
+
+### Architecture Layers (13)
+
+```
+AI Engine (9 modules):
+├── detection/              → YOLOv8 Object Detection
+├── tracking/               → DeepSORT Multi-Object Tracking
+├── speed_estimation/       → Speed Calculation
+├── violation_detection/    → Violation Engine (4 types)
+├── prediction/             → Accident & Congestion AI
+├── smart_city/             → Multi-Camera & City Analytics
+├── event_bus/              → Event-Driven Architecture (Pub/Sub)
+├── api_bridge/             → API Gateway / Communication Layer
+└── monitoring/             → Logging & Metrics (Observability)
+
+Full Stack (4 modules):
+├── backend/                → FastAPI REST Server + WebSocket
+├── frontend/               → React.js Real-time Dashboard
+├── mobile_app/             → Flutter Cross-Platform App
+└── docker/                 → Docker Deployment (one-click)
+```
+
 ## 📄 License
 
 MIT License — see [LICENSE](LICENSE)
