@@ -49,15 +49,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve React frontend static files (single port deployment)
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pathlib import Path
-
-_frontend_build = Path(__file__).resolve().parents[2] / "frontend" / "build"
-if _frontend_build.exists():
-    app.mount("/static", StaticFiles(directory=str(_frontend_build / "static")), name="static")
-
 # Routes
 app.include_router(violations.router, prefix="/api/violations", tags=["Violations"])
 app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
@@ -138,13 +129,22 @@ async def shutdown():
     logger.info("🛑 API server stopped")
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    """Serve React dashboard (single-port deployment)."""
-    index_path = _frontend_build / "index.html"
-    if index_path.exists():
-        return FileResponse(str(index_path))
-    return HTMLResponse("<h1>Frontend not built. Run: cd frontend && npm run build</h1>")
+    """API info page."""
+    ai_status = "🟢 Active" if ai_gateway else "🔴 Inactive"
+    return f"""
+    <html><head><title>AI Traffic Cop API</title></head>
+    <body style="font-family:sans-serif;background:#1e1e2e;color:#fff;padding:40px;">
+        <h1>🚔 AI Traffic Cop System API</h1>
+        <p>AI Gateway: {ai_status}</p>
+        <ul>
+            <li><a href="/api/docs" style="color:#4285f4;">📖 API Docs</a></li>
+            <li><a href="/api/health" style="color:#4285f4;">❤️ Health</a></li>
+        </ul>
+        <p>Frontend: <a href="http://localhost:3000" style="color:#4285f4;">http://localhost:3000</a></p>
+    </body></html>
+    """
 
 
 @app.get("/api/health")
@@ -242,21 +242,6 @@ async def broadcast(data: dict):
             ws_connections.remove(ws)
         except ValueError:
             pass
-
-
-# Catch-all: serve React frontend for any non-API route (SPA routing)
-@app.get("/{path:path}")
-async def serve_frontend(path: str):
-    """Serve React app for all non-API routes (SPA client-side routing)."""
-    # Check if it's a static file
-    file_path = _frontend_build / path
-    if file_path.exists() and file_path.is_file():
-        return FileResponse(str(file_path))
-    # Otherwise serve index.html (React handles routing)
-    index_path = _frontend_build / "index.html"
-    if index_path.exists():
-        return FileResponse(str(index_path))
-    return {"error": "Frontend not built. Run: cd frontend && npm run build"}
 
 
 def run():

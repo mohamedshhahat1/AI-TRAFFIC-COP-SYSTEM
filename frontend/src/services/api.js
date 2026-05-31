@@ -3,15 +3,9 @@
  * Auto-detects API URL: works in Coder proxy, localhost, and Docker
  */
 
-// API uses relative paths — works on any port/proxy (single-port deployment)
-const API_BASE = '/api';
-
-function getWsUrl() {
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${wsProtocol}//${window.location.host}/ws/live`;
-}
-
-const WS_URL = getWsUrl();
+// API connects to backend on port 8000
+const API_BASE = 'http://localhost:8000/api';
+const WS_URL = 'ws://localhost:8000/ws/live';
 
 // ==================== Core APIs ====================
 

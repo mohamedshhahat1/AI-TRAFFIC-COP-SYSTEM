@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { startCamera, stopCamera } from '../services/api';
 
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:8000/api';
 
 function LiveCameraFeed() {
   const [isLive, setIsLive] = useState(false);
