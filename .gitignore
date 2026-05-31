@@ -1,4 +1,8 @@
-# Python
+# ============================================
+# AI Traffic Cop System - .gitignore
+# ============================================
+
+# ---------- Python ----------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,47 +12,98 @@ dist/
 build/
 eggs/
 *.egg
+.pytest_cache/
 
-# Virtual Environment
+# ---------- Virtual Environment ----------
 venv/
 env/
-.env
+.venv/
 
-# IDE
+# ---------- Environment Variables ----------
+.env
+.env.local
+.env.production
+!frontend/.env
+
+# ---------- IDE ----------
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 
-# Models (large files)
+# ---------- AI Models (large files) ----------
 models/*.pt
 models/*.onnx
 models/*.engine
+models/training/
 !models/.gitkeep
+!models/README.md
+yolov8*.pt
 
-# Data
+# ---------- Data (videos/images) ----------
 data/videos/*.mp4
 data/videos/*.avi
+data/videos/*.mkv
 data/images/*.jpg
 data/images/*.png
 data/violations/*.jpg
+data/violations/*.png
 !data/videos/.gitkeep
 !data/images/.gitkeep
 !data/violations/.gitkeep
+!data/annotations/.gitkeep
 
-# Database
+# ---------- Database ----------
 *.db
 *.sqlite3
 
-# Logs
+# ---------- Logs ----------
 logs/
 *.log
 
-# OS
+# ---------- Node.js (Frontend) ----------
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+npm-debug.log*
+
+# ---------- Frontend Build (regenerated with npm run build) ----------
+frontend/build/
+
+# ---------- Flutter (Mobile) ----------
+mobile_app/.dart_tool/
+mobile_app/.packages
+mobile_app/build/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
+mobile_app/android/
+mobile_app/ios/
+mobile_app/web/
+mobile_app/linux/
+mobile_app/macos/
+mobile_app/windows/
+
+# ---------- Docker ----------
+docker/.env
+
+# ---------- OS ----------
 .DS_Store
 Thumbs.db
+Desktop.ini
+*.tmp
 
-# Credentials
+# ---------- Credentials / Secrets ----------
 *.pem
 *.key
+*.cert
 secrets.yaml
+firebase-credentials.json
+
+# ---------- Miscellaneous ----------
+.playwright-mcp/
+*.pyc
+.mypy_cache/
+.ruff_cache/
