@@ -343,224 +343,97 @@ This means:
 
 ---
 
-## ⚙️ Installation & Setup
+## 🔄 Complete Workflow (Train → Run)
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+ (for frontend)
-- Flutter SDK (for mobile)
-- Docker (optional)
-- NVIDIA GPU + CUDA (optional, for faster inference)
-
-### Step-by-Step Setup
-
+### Step 1: Setup (one time)
 ```bash
-# 1. Clone the repository
 git clone https://github.com/mohamedshhahat1/AI-TRAFFIC-COP-SYSTEM.git
 cd AI-TRAFFIC-COP-SYSTEM
-
-# 2. Create virtual environment
 python -m venv venv
-source venv/bin/activate   # Linux/Mac
-# venv\Scripts\activate    # Windows
-
-# 3. Install Python dependencies
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # Linux/Mac
 pip install -r requirements.txt
-
-# 4. Download YOLOv8 model (auto-downloads ~6MB)
-python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
-
-# 5. Run the system
-python scripts/run_pipeline.py --source data/videos/sample.mp4 --display
 ```
 
----
-
-## 🚀 How to Run
-
-### Option 1: Process a video file
+### Step 2: Get Training Data
 ```bash
-python scripts/run_pipeline.py --source data/videos/traffic.mp4 --display
+# Download from Roboflow (YOLO format) and extract:
+unzip dataset.zip -d data/annotations/
 ```
 
-### Option 2: Use webcam (live)
-```bash
-python scripts/run_pipeline.py --source 0 --display
-```
-
-### Option 3: RTSP camera stream (IP camera)
-```bash
-python scripts/run_pipeline.py --source "rtsp://192.168.1.100:554/stream" --display
-```
-
-### Option 4: API server only
-```bash
-uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
-# Swagger docs: http://localhost:8000/api/docs
-```
-
-### Option 5: Docker (one-click everything)
-```bash
-cd docker && docker-compose up --build
-# API: http://localhost:8000 | Dashboard: http://localhost:3000
-```
-
-### Full Stack (all services)
-```bash
-# Terminal 1: Backend API
-uvicorn backend.app.main:app --reload --port 8000
-
-# Terminal 2: Frontend Dashboard
-cd frontend && npm install && npm start
-# Opens: http://localhost:3000
-
-# Terminal 3: AI Pipeline
-python scripts/run_pipeline.py --source data/videos/traffic.mp4 --display
-
-# Terminal 4: (Optional) Mobile App
-cd mobile_app && flutter run
-```
-
----
-
-## 🧠 How to Train Custom Model
-
-### Step 1: Prepare Dataset
-
-```
-data/annotations/
-├── dataset.yaml          ← Config file (see below)
-├── train/
-│   ├── images/           ← Training images (.jpg/.png)
-│   └── labels/           ← YOLO format labels (.txt)
-└── val/
-    ├── images/           ← Validation images
-    └── labels/           ← Validation labels
-```
-
-### Step 2: Create `data/annotations/dataset.yaml`
-
-```yaml
-path: ./data/annotations
-train: train/images
-val: val/images
-
-names:
-  0: car
-  1: truck
-  2: bus
-  3: motorcycle
-  4: person
-  5: traffic_light
-```
-
-### Step 3: Label Your Data
-
-Use free labeling tools:
-- **[Roboflow](https://roboflow.com)** — easiest, web-based, auto-export YOLO format
-- **[LabelImg](https://github.com/heartexlabs/labelImg)** — desktop app
-- **[CVAT](https://cvat.ai)** — advanced web-based tool
-
-Export in **YOLO format** → each image gets a `.txt`:
-```
-# class_id  x_center  y_center  width  height  (all normalized 0-1)
-2 0.45 0.60 0.12 0.08
-0 0.70 0.55 0.15 0.10
-```
-
-### Step 4: Train
-
+### Step 3: Train
 ```bash
 python scripts/train_model.py
+# ⏳ Wait... (5-60 min depending on GPU/dataset size)
+# ✅ Model saved to: models/training/traffic_cop_v1/weights/best.pt
 ```
 
-Or with custom settings:
-```python
-from ultralytics import YOLO
-
-model = YOLO("yolov8n.pt")  # Start from pre-trained
-
-model.train(
-    data="data/annotations/dataset.yaml",
-    epochs=100,
-    imgsz=640,
-    batch=16,
-    project="models/training",
-    name="traffic_cop_v1",
-)
-```
-
-### Step 5: Use Your Trained Model
-
-Update `configs/settings.yaml`:
+### Step 4: Update Config
+Edit `configs/settings.yaml`:
 ```yaml
 detection:
   model: "models/training/traffic_cop_v1/weights/best.pt"
 ```
 
-Then run:
+### Step 5: Run the System
 ```bash
-python scripts/run_pipeline.py --source data/videos/test.mp4 --display
+python scripts/run_pipeline.py --source data/videos/traffic.mp4 --display
 ```
 
-### Step 6: Export for Production (optional)
+### Flow Summary:
+```
+Setup → Get Data → Train → Update Config → Run
+  ↓        ↓         ↓          ↓            ↓
+ pip    Roboflow   train.py   settings.yaml  run_pipeline.py
+```
+
+### ⚡ Skip Training (Quick Demo)
 ```bash
-python scripts/export_model.py --model models/training/traffic_cop_v1/weights/best.pt --format onnx
+# YOLOv8 pre-trained already knows cars/trucks/people/traffic lights
+# Just run — no training needed:
+python scripts/run_pipeline.py --source data/videos/sample.mp4 --display
 ```
 
 ---
 
-## 🎥 Where to Get Test Videos
+## 🖥️ Running on Windows
 
-| Source | Description |
-|--------|-------------|
-| YouTube | Search "traffic camera footage" or "dashcam" |
-| [Kaggle](https://kaggle.com) | Traffic video datasets |
-| Your phone | Record any road/intersection |
-| RTSP cameras | Connect IP cameras directly |
+```bash
+git clone https://github.com/mohamedshhahat1/AI-TRAFFIC-COP-SYSTEM.git
+cd AI-TRAFFIC-COP-SYSTEM
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
 
-Place videos in `data/videos/` directory.
+# Terminal 1: AI Pipeline
+python scripts/run_pipeline.py --source data/videos/sample.mp4 --display
 
----
+# Terminal 2: API Server
+uvicorn backend.app.main:app --reload --port 8000
 
-## 🔧 Configuration
+# Terminal 3: Frontend Dashboard
+cd frontend && npm install && npm start
+```
 
-Edit `configs/settings.yaml`:
-```yaml
-camera:
-  source: "data/videos/sample.mp4"  # video path, "0" for webcam, or rtsp://
-
-detection:
-  model: "yolov8n"        # yolov8n/s/m/l/x (bigger = more accurate but slower)
-  confidence: 0.5         # Lower = more detections, higher = fewer false positives
-
-speed:
-  limit: 60               # Speed limit in km/h
-  pixel_to_meter: 0.05    # Calibrate for your camera angle
-
-violations:
-  speed_enabled: true
-  red_light_enabled: true
-  lane_enabled: true
-  parking_enabled: true
+**GPU (Optional):**
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 ```
 
 ---
 
-## 💻 System Requirements
+## 🐳 Running with Docker (One-Click)
 
-| Requirement | Minimum | Recommended |
-|-------------|---------|-------------|
-| Python | 3.9+ | 3.11 |
-| RAM | 4 GB | 8+ GB |
-| GPU | Not required | NVIDIA (CUDA) |
-| Storage | 2 GB | 10+ GB |
+```bash
+# Prerequisites: Docker Desktop installed & running
+cd AI-TRAFFIC-COP-SYSTEM/docker
+docker-compose up --build
 
-**Performance:**
-- Without GPU: ~5-10 FPS (CPU)
-- With GPU (RTX 3060+): ~60+ FPS
+# API:       http://localhost:8000
+# Dashboard: http://localhost:3000
+```
 
----
+Stop: `docker-compose down` | Rebuild: `docker-compose up --build`
 
 ---
 
