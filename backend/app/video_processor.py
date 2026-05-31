@@ -1,0 +1,146 @@
+"""
+Video Processor - Background task that feeds video frames to the AI Gateway.
+Results are automatically broadcast to all WebSocket clients (dashboard).
+"""
+
+import asyncio
+import threading
+import cv2
+import time
+from pathlib import Path
+
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("video_processor")
+except (ImportError, Exception):
+    from loguru import logger
+
+
+class VideoProcessor:
+    """Processes video in a background thread and pushes results to the API."""
+    
+    def __init__(self, gateway, broadcast_fn):
+        self.gateway = gateway
+        self.broadcast = broadcast_fn
+        self._thread = None
+        self._running = False
+        self._source = None
+        self._loop = None
+        self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
+    
+    def start(self, source: str = "data/videos/traffic.mp4"):
+        """Start processing video in background thread."""
+        if self._running:
+            return {"status": "already_running"}
+        
+        self._source = source
+        self._running = True
+        try:
+            self._loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self._loop = asyncio.get_event_loop()
+        self._thread = threading.Thread(target=self._process_loop, daemon=True)
+        self._thread.start()
+        
+        logger.info(f"Video processing started: {source}")
+        return {"status": "started", "source": source}
+    
+    def stop(self):
+        """Stop video processing."""
+        self._running = False
+        if self._thread:
+            self._thread.join(timeout=3)
+        logger.info("Video processing stopped")
+        return {"status": "stopped"}
+    
+    def _process_loop(self):
+        """Background video processing loop."""
+        cap = cv2.VideoCapture(self._source)
+        
+        if not cap.isOpened():
+            logger.error(f"Cannot open video: {self._source}")
+            self._running = False
+            return
+        
+        fps_counter = 0
+        fps_start = time.time()
+        
+        while self._running and cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                # Loop video
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                continue
+            
+            # Process frame through AI Gateway
+            results = self.gateway.process_frame(frame)
+            fps_counter += 1
+            
+            # Calculate FPS
+            elapsed = time.time() - fps_start
+            if elapsed >= 1.0:
+                current_fps = fps_counter / elapsed
+                fps_counter = 0
+                fps_start = time.time()
+            else:
+                current_fps = self.stats["fps"]
+            
+            # Extract stats - handle both pipeline and formatted response
+            stats = results.get("stats", results)
+            detections = stats.get("detected_objects", 0) or results.get("detections", {}).get("count", 0)
+            tracks_val = stats.get("active_tracks", 0) or results.get("tracking", {}).get("active_vehicles", 0)
+            violations_val = stats.get("new_violations", 0) or results.get("violations", {}).get("new_count", 0)
+            
+            self.stats = {
+                "fps": round(current_fps, 1),
+                "objects": detections,
+                "tracks": tracks_val,
+                "frame": results.get("frame_number", 0) or stats.get("frame_number", 0),
+                "violations": violations_val,
+                "congestion": stats.get("congestion_level", "free") or results.get("congestion", {}).get("level", "free"),
+                "health_score": stats.get("health_score", 100),
+            }
+            
+            # Broadcast to WebSocket clients
+            self._send_update({
+                "type": "frame_update",
+                "data": self.stats
+            })
+            
+            # Broadcast violations
+            raw_violations = results.get("violations", [])
+            if isinstance(raw_violations, dict):
+                raw_violations = raw_violations.get("items", [])
+            for v in raw_violations:
+                v_data = v.to_dict() if hasattr(v, 'to_dict') else v
+                self._send_update({
+                    "type": "violation",
+                    "data": v_data
+                })
+            
+            # Broadcast accident risks
+            raw_risks = results.get("accident_risks", [])
+            if isinstance(raw_risks, dict):
+                raw_risks = raw_risks.get("items", [])
+            for r in raw_risks:
+                if hasattr(r, 'risk_level'):
+                    self._send_update({"type": "accident_risk", "data": {"level": r.risk_level, "vehicles": r.involved_vehicles, "ttc": r.time_to_collision}})
+                elif isinstance(r, dict):
+                    self._send_update({"type": "accident_risk", "data": r})
+            
+            # Throttle to ~10 FPS max for CPU
+            time.sleep(0.05)
+        
+        cap.release()
+        self._running = False
+    
+    def _send_update(self, data):
+        """Thread-safe broadcast to WebSocket clients."""
+        if self._loop and self._loop.is_running():
+            self._loop.call_soon_threadsafe(
+                asyncio.ensure_future, self.broadcast(data)
+            )
+    
+    @property
+    def is_running(self):
+        return self._running

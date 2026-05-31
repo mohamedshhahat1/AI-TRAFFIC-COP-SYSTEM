@@ -26,6 +26,7 @@ import uvicorn
 
 from .config import settings
 from .routes import violations, vehicles, analytics
+from .video_processor import VideoProcessor
 
 # Add project root to path for ai_engine imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -58,12 +59,13 @@ ws_connections: list = []
 
 # AI Gateway (production integration)
 ai_gateway = None
+video_processor = None
 
 
 @app.on_event("startup")
 async def startup():
     """Initialize AI Gateway and subscribe to Event Bus events."""
-    global ai_gateway
+    global ai_gateway, video_processor
     logger.info("🚀 Starting AI Traffic Cop API...")
 
     # Initialize AI Gateway
@@ -102,6 +104,9 @@ async def startup():
                 asyncio.ensure_future, broadcast({"type": "tracking", "data": event.data})
             ))
 
+        # Initialize video processor (connects pipeline → WebSocket)
+        video_processor = VideoProcessor(ai_gateway, broadcast)
+        
         logger.info("✅ AI Gateway initialized - Event Bus subscriptions active")
 
     except ImportError as e:
@@ -183,17 +188,31 @@ async def event_history(topic: str = "violation.*", limit: int = 20):
 
 
 @app.post("/api/camera/start")
-async def start_camera():
-    """Start the AI pipeline camera processing."""
+async def start_camera(source: str = "data/videos/traffic.mp4"):
+    """Start processing video - results stream to WebSocket."""
+    global video_processor
     if not ai_gateway:
         return {"status": "error", "message": "AI Gateway not initialized"}
-    return {"status": "started", "message": "Camera feed processing started"}
+    if not video_processor:
+        return {"status": "error", "message": "Video processor not available"}
+    return video_processor.start(source)
 
 
 @app.post("/api/camera/stop")
 async def stop_camera():
-    """Stop the AI pipeline camera processing."""
-    return {"status": "stopped", "message": "Camera feed processing stopped"}
+    """Stop video processing."""
+    global video_processor
+    if video_processor:
+        return video_processor.stop()
+    return {"status": "stopped"}
+
+
+@app.get("/api/camera/stats")
+async def camera_stats():
+    """Get live processing stats (FPS, objects, violations)."""
+    if video_processor and video_processor.is_running:
+        return {"running": True, **video_processor.stats}
+    return {"running": False, "fps": 0, "objects": 0, "tracks": 0, "frame": 0}
 
 
 @app.websocket("/ws/live")
