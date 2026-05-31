@@ -30,6 +30,8 @@ class VideoProcessor:
         self.camera_info = {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
         self._latest_frame = None  # Latest annotated frame (JPEG bytes)
         self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
+        self._confidence_sum = 0.0
+        self._confidence_count = 0
     
     def start(self, source: str = "data/videos/traffic.mp4"):
         """Start processing video in background thread."""
@@ -112,6 +114,11 @@ class VideoProcessor:
                 cls_name = d.class_name if hasattr(d, "class_name") else d.get("class", "")
                 if cls_name in self.detection_counts:
                     self.detection_counts[cls_name] += 1
+                # Track confidence for accuracy metric
+                conf = d.confidence if hasattr(d, "confidence") else d.get("confidence", 0)
+                if conf > 0:
+                    self._confidence_sum += conf
+                    self._confidence_count += 1
 
             self.stats = {
                 "fps": round(current_fps, 1),
@@ -122,6 +129,7 @@ class VideoProcessor:
                 "congestion": stats.get("congestion_level", "free") or results.get("congestion", {}).get("level", "free"),
                 "health_score": stats.get("health_score", 100),
                 "detection_counts": self.detection_counts,
+                "avg_confidence": round(self._confidence_sum / max(self._confidence_count, 1) * 100, 1),
             }
             
             # Annotate frame with bounding boxes, IDs, speed, violations

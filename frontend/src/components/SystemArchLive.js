@@ -32,9 +32,7 @@ function SystemArchLive() {
           frames: stats.frame || 0,
           events: events.total_emitted || 0,
           apiRequests: requests.total_requests || 0,
-          accuracy: inference.total_inferences > 0 
-            ? (94.5 + (inference.avg_latency_ms < 150 ? 2.5 : 0)).toFixed(1)
-            : 0,
+          accuracy: stats.avg_confidence || 0,
           uptime: inference.uptime_seconds || 0,
           totalDetections: inference.total_inferences || 0,
           totalViolations: events.total_handled || 0,
@@ -66,7 +64,7 @@ function SystemArchLive() {
     { icon: '🎞️', label: 'Frames Processed', value: formatNumber(data.frames), color: '#4285f4', pulse: true },
     { icon: '⚡', label: 'Events Generated', value: formatNumber(data.events), color: '#fbbc04', pulse: true },
     { icon: '📡', label: 'API Requests', value: formatNumber(data.apiRequests), color: '#34a853', pulse: true },
-    { icon: '🎯', label: 'Detection Accuracy', value: `${data.accuracy}%`, color: '#ea4335', pulse: false },
+    { icon: '🎯', label: 'Avg Confidence (YOLO)', value: `${data.accuracy}%`, color: '#ea4335', pulse: false },
     { icon: '⏱️', label: 'System Uptime', value: formatUptime(data.uptime), color: '#9b59b6', pulse: false },
     { icon: '🧠', label: 'AI Inferences', value: formatNumber(data.totalDetections), color: '#00bcd4', pulse: true },
   ];
