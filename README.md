@@ -114,6 +114,9 @@ AI-Traffic-Cop-System/
 │   │   ├── inference_service.py     # Sync/async inference
 │   │   ├── message_broker.py        # Cross-service comms
 │   │   └── api_gateway.py           # Single entry point
+│   ├── monitoring/                  # 📊 Logging & Monitoring
+│   │   ├── logger.py               # Structured logging system
+│   │   └── metrics.py              # Performance metrics & health
 │   ├── pipeline.py                  # Main AI pipeline
 │   └── utils.py                     # Utility functions
 │
@@ -263,6 +266,8 @@ gateway.on_accident_risk(send_emergency)
 |---------|-------------|
 | 🔥 Event-Driven | Pub/sub like Uber/Tesla |
 | 🌐 API Gateway | Single entry point, scalable |
+| 📊 Monitoring | Metrics, health scoring, Prometheus |
+| 📝 Logging | Structured logs, rotation, alerting |
 | 📡 WebSocket | Real-time dashboard updates |
 | 🐳 Docker | One-click deployment |
 | 🧪 Tests | Unit test coverage |
@@ -278,6 +283,7 @@ gateway.on_accident_risk(send_emergency)
 | Vision | OpenCV |
 | ML | PyTorch |
 | Event System | Custom Event Bus |
+| Monitoring | Custom MetricsCollector + Loguru |
 | API Gateway | Custom InferenceService |
 | Backend | FastAPI + SQLAlchemy |
 | Database | PostgreSQL / SQLite |
@@ -319,6 +325,11 @@ cd docker && docker-compose up --build
 | GET | `/api/analytics/` | Statistics |
 | GET | `/api/events/metrics` | Event Bus metrics |
 | GET | `/api/events/history` | Recent events |
+| GET | `/api/analytics/health` | System health score |
+| GET | `/api/analytics/metrics` | Performance metrics (p50/p95/p99) |
+| GET | `/api/analytics/metrics/prometheus` | Prometheus export |
+| GET | `/api/analytics/logs` | Recent structured logs |
+| GET | `/api/analytics/logs/stats` | Log statistics |
 | WS | `/ws/live` | Real-time event stream |
 
 ---

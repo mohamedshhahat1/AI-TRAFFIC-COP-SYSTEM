@@ -26,6 +26,8 @@ from concurrent.futures import ThreadPoolExecutor
 from queue import Queue, Empty
 
 from ..pipeline import AIPipeline
+from ..monitoring.logger import SystemLogger
+from ..monitoring.metrics import MetricsCollector
 
 
 class JobStatus(Enum):
@@ -86,6 +88,10 @@ class InferenceService:
         """
         self.config = config or {}
         self.max_workers = max_workers
+        
+        # Monitoring
+        self._log = SystemLogger("inference_service")
+        self._metrics = MetricsCollector()
         
         # AI Pipeline (the actual brain)
         self._pipeline: Optional[AIPipeline] = None

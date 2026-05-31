@@ -158,6 +158,55 @@ The backend ONLY talks to `AIGateway` — it never touches the AI internals.
 - Clean separation of concerns
 - Easy to add new consumers (just subscribe to events)
 
+
+## 📊 Logging & Monitoring Layer
+
+Every component is observed through two systems:
+
+### SystemLogger (Structured Logging)
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
+│  Component  │────▶│ SystemLogger │────▶│ Console (color) │
+│  (any)      │     │              │────▶│ File (rotated)  │
+│             │     │              │────▶│ Memory (recent) │
+└─────────────┘     └──────────────┘     └─────────────────┘
+```
+
+Features:
+- Structured JSON logs with context
+- Automatic rotation (50MB) & retention (30 days)
+- Per-component filtering
+- Timer context manager for performance logging
+- In-memory buffer for dashboard display
+
+### MetricsCollector (Performance Monitoring)
+```
+┌─────────────┐     ┌──────────────────┐     ┌──────────────┐
+│  Pipeline   │────▶│ MetricsCollector │────▶│  Dashboard   │
+│  (timed)    │     │                  │────▶│  Prometheus  │
+│             │     │  - Latency p95   │────▶│  Alerts      │
+│             │     │  - Health score  │     └──────────────┘
+└─────────────┘     │  - Anomaly det.  │
+                    └──────────────────┘
+```
+
+Features:
+- Latency percentiles (p50, p95, p99) per component
+- Health scoring (0-100%) with auto-alerts
+- Anomaly detection (3σ deviations)
+- Prometheus export format
+- Counter, gauge, and timer primitives
+
+### Monitored Components
+| Component | Metrics Tracked |
+|-----------|----------------|
+| Detection | inference_ms, detections_count |
+| Tracking | tracking_ms, active_tracks |
+| Speed | speed_estimation_ms |
+| Violations | violation_detection_ms, violations_total |
+| Prediction | prediction_ms, accident_risks_total |
+| Pipeline | frame_processing_ms, fps, health_score |
+
 ## Layer Descriptions
 
 ### 1. Detection Layer (`ai_engine/detection/`)
@@ -192,24 +241,30 @@ The backend ONLY talks to `AIGateway` — it never touches the AI internals.
 - Wildcard matching, replay, dead letter queue
 - Rate limiting, middleware support
 
-### 8. API Bridge (`ai_engine/api_bridge/`) 🌐 NEW
+### 8. Monitoring (`ai_engine/monitoring/`) 📊 NEW
+- `SystemLogger` - Structured logging with context & rotation
+- `MetricsCollector` - Latency percentiles, health scoring, anomaly detection
+- Prometheus export for Grafana integration
+- Every pipeline layer is timed and health-scored
+
+### 9. API Bridge (`ai_engine/api_bridge/`) 🌐
 - `AIGateway` - Single entry point for backend
 - `InferenceService` - Sync/async/batch inference
 - `MessageBroker` - Cross-service communication
 
-### 9. Backend (`backend/`)
+### 10. Backend (`backend/`)
 - FastAPI REST server + WebSocket
 - Database (SQLAlchemy + PostgreSQL/SQLite)
 - Subscribes to Event Bus for real-time data
 
-### 10. Frontend (`frontend/`)
+### 11. Frontend (`frontend/`)
 - React.js web dashboard
 - Real-time via WebSocket
 
-### 11. Mobile (`mobile_app/`)
+### 12. Mobile (`mobile_app/`)
 - Flutter cross-platform app
 - Push notifications
 
-### 12. Docker (`docker/`)
+### 13. Docker (`docker/`)
 - One-click deployment
 - docker-compose orchestration
