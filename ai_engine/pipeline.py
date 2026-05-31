@@ -50,21 +50,21 @@ class AIPipeline:
         # Layer 1: Detection
         self.log.info("Loading detection model...")
         self.detector = YOLODetector(
-            model_name=cfg.get("model", "yolov8n"),
-            confidence=cfg.get("confidence", 0.5),
-            device=cfg.get("device", "auto"),
+            model_name=cfg.get("detection", {}).get("model", cfg.get("model", "yolov8n")),
+            confidence=cfg.get("detection", {}).get("confidence", cfg.get("confidence", 0.5)),
+            device=cfg.get("detection", {}).get("device", cfg.get("device", "auto")),
         )
         
         # Layer 2: Tracking
         self.tracker = DeepSortTracker(
-            max_age=cfg.get("max_age", 30),
-            embedder=cfg.get("embedder", "mobilenet"),
+            max_age=cfg.get("tracking", {}).get("max_age", cfg.get("max_age", 30)),
+            embedder=cfg.get("tracking", {}).get("embedder", cfg.get("embedder", "mobilenet")),
         )
         
         # Layer 3: Speed
         self.speed_calc = SpeedCalculator(
-            speed_limit=cfg.get("speed_limit", 60),
-            fps=cfg.get("fps", 30),
+            speed_limit=cfg.get("speed", {}).get("limit", cfg.get("speed_limit", 60)),
+            fps=cfg.get("camera", {}).get("fps", cfg.get("fps", 30)),
         )
         
         # Layer 4: Violations
