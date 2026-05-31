@@ -1,7 +1,11 @@
 """Database Service - handles all DB operations."""
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("db_service")
+except ImportError:
+    from loguru import logger
 
 from pathlib import Path
 

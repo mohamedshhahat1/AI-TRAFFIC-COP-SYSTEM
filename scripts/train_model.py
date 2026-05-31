@@ -6,7 +6,11 @@ Fine-tune YOLOv8 on custom traffic dataset.
 import sys
 sys.path.insert(0, '.')
 
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("train_model")
+except ImportError:
+    from loguru import logger
 
 try:
     from ultralytics import YOLO

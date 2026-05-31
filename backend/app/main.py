@@ -17,7 +17,11 @@ from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("main")
+except ImportError:
+    from loguru import logger
 import uvicorn
 
 from .config import settings

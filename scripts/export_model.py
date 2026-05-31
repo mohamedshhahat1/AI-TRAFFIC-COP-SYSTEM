@@ -6,7 +6,11 @@ Export trained model to ONNX/TensorRT for deployment.
 import sys
 sys.path.insert(0, '.')
 
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("export_model")
+except ImportError:
+    from loguru import logger
 
 try:
     from ultralytics import YOLO
