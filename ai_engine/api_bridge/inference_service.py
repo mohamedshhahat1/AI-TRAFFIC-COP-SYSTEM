@@ -26,10 +26,11 @@ except ImportError:
     from loguru import logger
 import time
 import uuid
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue, Empty
 
-from ..pipeline import AIPipeline
+# AIPipeline imported lazily in start() to avoid circular imports
 from ..monitoring.logger import SystemLogger
 from ..monitoring.metrics import MetricsCollector
 
@@ -105,11 +106,13 @@ class InferenceService:
         self._jobs: Dict[str, InferenceJob] = {}
         self._executor = ThreadPoolExecutor(max_workers=max_workers)
         
-        # State
+        # State (thread-safe)
         self._is_running = False
         self._total_inferences = 0
         self._total_time_ms = 0.0
         self._start_time = 0.0
+        self._counter_lock = threading.Lock()
+        self._max_jobs = 1000  # Prevent unbounded growth
         
         # Callbacks for real-time events
         self._on_violation_callbacks = []
@@ -122,6 +125,7 @@ class InferenceService:
         logger.info("🚀 Starting Inference Service...")
         
         try:
+            from ..pipeline import AIPipeline  # Lazy import to avoid circular deps
             self._pipeline = AIPipeline(self.config)
             self._is_running = True
             self._start_time = time.time()
@@ -159,8 +163,9 @@ class InferenceService:
             results = self._pipeline.process_frame(frame)
             
             proc_time = (time.time() - t_start) * 1000
-            self._total_inferences += 1
-            self._total_time_ms += proc_time
+            with self._counter_lock:
+                self._total_inferences += 1
+                self._total_time_ms += proc_time
             
             # Trigger callbacks for violations
             if results.get("violations"):
@@ -268,8 +273,16 @@ class InferenceService:
             logger.error(f"Job {job.job_id} failed: {e}")
         
         job.processing_time_ms = (time.time() - t_start) * 1000
-        self._total_inferences += 1
-        self._total_time_ms += job.processing_time_ms
+        with self._counter_lock:
+            self._total_inferences += 1
+            self._total_time_ms += job.processing_time_ms
+        
+        # Cleanup old completed jobs (prevent memory leak)
+        if len(self._jobs) > self._max_jobs:
+            completed = [jid for jid, j in self._jobs.items() 
+                        if j.status in (JobStatus.COMPLETED, JobStatus.FAILED)]
+            for jid in completed[:len(completed)//2]:
+                del self._jobs[jid]
     
     # ==================== Stream API ====================
     

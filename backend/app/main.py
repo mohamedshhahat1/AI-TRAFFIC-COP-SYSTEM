@@ -78,20 +78,25 @@ async def startup():
         ai_gateway.start()
 
         # Subscribe to Event Bus → broadcast to WebSocket clients
+        # Use call_soon_threadsafe since Event Bus may fire from non-asyncio threads
+        loop = asyncio.get_event_loop()
+
         ai_gateway.on_violation(
-            lambda v: asyncio.create_task(broadcast({"type": "violation", "data": v}))
+            lambda v: loop.call_soon_threadsafe(asyncio.ensure_future, broadcast({"type": "violation", "data": v}))
         )
         ai_gateway.on_accident_risk(
-            lambda r: asyncio.create_task(broadcast({"type": "accident_risk", "data": r}))
+            lambda r: loop.call_soon_threadsafe(asyncio.ensure_future, broadcast({"type": "accident_risk", "data": r}))
         )
         ai_gateway.on_congestion_change(
-            lambda c: asyncio.create_task(broadcast({"type": "congestion", "data": c}))
+            lambda c: loop.call_soon_threadsafe(asyncio.ensure_future, broadcast({"type": "congestion", "data": c}))
         )
 
-        # Subscribe to tracking updates
-        ai_gateway.event_bus.on("tracking.update", lambda event: asyncio.create_task(
-            broadcast({"type": "tracking", "data": event.data})
-        ))
+        # Subscribe to tracking updates via Event Bus
+        event_bus = ai_gateway.event_bus
+        if event_bus:
+            event_bus.on("tracking.update", lambda event: loop.call_soon_threadsafe(
+                asyncio.ensure_future, broadcast({"type": "tracking", "data": event.data})
+            ))
 
         logger.info("✅ AI Gateway initialized - Event Bus subscriptions active")
 
@@ -205,20 +210,26 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             await websocket.send_json({"status": "ok", "echo": data})
     except WebSocketDisconnect:
-        ws_connections.remove(websocket)
+        try:
+            ws_connections.remove(websocket)
+        except ValueError:
+            pass  # Already removed by broadcast() cleanup
         logger.info(f"WS disconnected ({len(ws_connections)} active)")
 
 
 async def broadcast(data: dict):
     """Broadcast event to ALL connected WebSocket clients (dashboard + mobile)."""
     disconnected = []
-    for ws in ws_connections:
+    for ws in list(ws_connections):  # Iterate over copy to avoid concurrent modification
         try:
             await ws.send_json(data)
         except Exception:
             disconnected.append(ws)
     for ws in disconnected:
-        ws_connections.remove(ws)
+        try:
+            ws_connections.remove(ws)
+        except ValueError:
+            pass
 
 
 def run():

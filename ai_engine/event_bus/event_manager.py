@@ -172,7 +172,7 @@ class EventManager:
         self._rate_limit_config: Dict[str, int] = {}  # topic → max per second
         
         # Thread safety
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()  # RLock allows reentrant emit() from callbacks
         
         # Async executor
         self._executor = ThreadPoolExecutor(max_workers=4)
@@ -381,9 +381,14 @@ class EventManager:
     def _call_async_handler(self, handler: EventHandler, event: Event):
         """Execute async handler in thread pool."""
         try:
+            asyncio.run(handler.callback(event))
+        except RuntimeError:
+            # If already in an async context, create a new loop
             loop = asyncio.new_event_loop()
-            loop.run_until_complete(handler.callback(event))
-            loop.close()
+            try:
+                loop.run_until_complete(handler.callback(event))
+            finally:
+                loop.close()
         except Exception as e:
             logger.error(f"Async handler execution error: {e}")
     

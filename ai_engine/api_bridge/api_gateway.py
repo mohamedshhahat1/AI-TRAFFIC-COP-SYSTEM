@@ -91,7 +91,7 @@ class AIGateway:
         """
         if self.inference._pipeline:
             return self.inference._pipeline.event_bus
-        return EventManager()  # Fallback empty bus
+        return None  # Pipeline not started yet
     
     def stop(self):
         """Stop all AI services."""

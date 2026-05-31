@@ -3,7 +3,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from loguru import logger
 
-DATABASE_URL = "sqlite+aiosqlite:///./data/traffic_cop.db"
+from pathlib import Path
+
+# Use absolute path to avoid issues when server starts from different directories
+_project_root = Path(__file__).resolve().parents[3]
+DATABASE_URL = f"sqlite+aiosqlite:///{_project_root}/data/traffic_cop.db"
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
