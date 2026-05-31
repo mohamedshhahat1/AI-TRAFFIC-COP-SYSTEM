@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
+import { startCamera, stopCamera } from '../services/api';
 
 function LiveCameraFeed() {
   const [isLive, setIsLive] = useState(false);
+  const [status, setStatus] = useState('');
   const [stats, setStats] = useState({ fps: 0, objects: 0 });
 
   const handleStart = async () => {
-    try {
-      await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/camera/start`, { method: 'POST' });
+    setStatus('Starting...');
+    const result = await startCamera();
+    if (result.status === 'started' || result.status === 'error') {
       setIsLive(true);
-    } catch (e) {
-      setIsLive(true); // Show UI even if API is down
+      setStatus(result.message || 'Camera feed active');
+    } else {
+      setStatus('Failed to start - check backend connection');
     }
   };
 
   const handleStop = async () => {
-    try {
-      await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/camera/stop`, { method: 'POST' });
-    } catch (e) {}
+    setStatus('Stopping...');
+    await stopCamera();
     setIsLive(false);
+    setStatus('Camera stopped');
+    setTimeout(() => setStatus(''), 2000);
   };
 
   return (
@@ -38,11 +43,13 @@ function LiveCameraFeed() {
               <span>Objects: {stats.objects}</span>
             </div>
             <p>AI Pipeline processing frames...</p>
+            <small style={{color: '#34a853'}}>{status}</small>
           </div>
         ) : (
           <div className="feed-placeholder">
             <p>📷 Click Start to begin monitoring</p>
             <small>Connects to AI Gateway → Event Bus → Dashboard</small>
+            {status && <p style={{color: '#fbbc04', marginTop: 10}}>{status}</p>}
           </div>
         )}
       </div>
