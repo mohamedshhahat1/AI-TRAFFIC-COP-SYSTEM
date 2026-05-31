@@ -114,7 +114,7 @@ class VideoProcessor:
                 cls_name = d.class_name if hasattr(d, "class_name") else d.get("class", "")
                 if cls_name in self.detection_counts:
                     self.detection_counts[cls_name] += 1
-                # Track confidence for accuracy metric
+                # Track avg detection confidence (NOT accuracy — that requires Ground Truth)
                 conf = d.confidence if hasattr(d, "confidence") else d.get("confidence", 0)
                 if conf > 0:
                     self._confidence_sum += conf
