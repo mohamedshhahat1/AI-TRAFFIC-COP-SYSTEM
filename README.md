@@ -248,6 +248,56 @@ gateway.on_accident_risk(send_emergency)
 
 ---
 
+---
+
+## 🔌 Backend ↔ AI Engine Integration
+
+The backend **fully initializes the AIGateway on startup** and subscribes to the Event Bus:
+
+```python
+# backend/app/main.py (startup)
+
+from ai_engine.api_bridge import AIGateway
+
+ai_gateway = AIGateway(config)
+ai_gateway.start()
+
+# Subscribe to Event Bus → broadcast to WebSocket clients
+ai_gateway.on_violation(lambda v: broadcast({"type": "violation", "data": v}))
+ai_gateway.on_accident_risk(lambda r: broadcast({"type": "accident_risk", "data": r}))
+ai_gateway.on_congestion_change(lambda c: broadcast({"type": "congestion", "data": c}))
+
+# Direct Event Bus subscription (full features: wildcards, priority, replay)
+ai_gateway.event_bus.on("tracking.update", lambda event: broadcast(event.data))
+```
+
+### Graceful Fallback
+
+The system handles missing AI dependencies gracefully:
+
+| Environment | Behavior |
+|-------------|----------|
+| **With GPU + AI packages** | ✅ Full pipeline + Event Bus + WebSocket broadcasting |
+| **Without GPU / AI packages** | ✅ API still runs (API-only mode) — no crash |
+
+```
+Startup with AI:
+  🚀 Starting AI Traffic Cop API...
+  ✅ AI Gateway initialized - Event Bus subscriptions active
+  ✅ API server ready
+
+Startup without AI:
+  🚀 Starting AI Traffic Cop API...
+  ⚠️ AI Engine not available: No module named 'ultralytics'
+  Running in API-only mode (no AI processing)
+  ✅ API server ready
+```
+
+This means:
+- **Production** (GPU server): Full AI + real-time events
+- **Development** (laptop): API works for frontend/mobile development
+- **Docker**: Everything runs together automatically
+
 ## 🚀 Features
 
 ### AI Features
