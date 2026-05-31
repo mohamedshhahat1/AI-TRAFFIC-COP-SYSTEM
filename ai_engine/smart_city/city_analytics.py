@@ -139,13 +139,20 @@ class CityAnalytics:
         """Get aggregated data for city dashboard."""
         recent = self._traffic_data[-1] if self._traffic_data else {}
         
-        return {
+        result = {
             "current_vehicles": recent.get("total_vehicles", 0),
             "city_avg_speed": recent.get("avg_city_speed", 0),
             "peak_hours": self.get_peak_hours(),
             "total_snapshots": len(self._traffic_data),
-            "environmental": self.estimate_environmental_impact(
+        }
+        
+        # Only compute environmental impact when we have real data
+        if recent:
+            result["environmental"] = self.estimate_environmental_impact(
                 recent.get("total_vehicles", 0),
                 recent.get("avg_city_speed", 30),
-            ),
-        }
+            )
+        else:
+            result["environmental"] = {"estimated_co2_g_per_km": 0, "total_vehicles": 0}
+        
+        return result

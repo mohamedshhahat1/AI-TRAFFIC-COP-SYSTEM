@@ -10,27 +10,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/traffic_cop
+      - DATABASE_URL=sqlite+aiosqlite:///./data/traffic_cop.db
       - DEBUG=false
-    depends_on:
-      - db
     volumes:
       - ../data:/app/data
       - ../models:/app/models
-    restart: unless-stopped
-
-  # PostgreSQL Database
-  db:
-    image: postgres:15-alpine
-    container_name: traffic-cop-db
-    environment:
-      POSTGRES_DB: traffic_cop
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
   # Frontend (React)
@@ -45,8 +29,9 @@ services:
       - REACT_APP_API_URL=http://localhost:8000/api
     volumes:
       - ../frontend:/app
+      - frontend_modules:/app/node_modules
     depends_on:
       - api
 
 volumes:
-  pgdata:
+  frontend_modules:

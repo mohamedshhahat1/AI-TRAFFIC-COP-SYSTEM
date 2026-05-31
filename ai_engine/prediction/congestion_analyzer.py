@@ -58,6 +58,7 @@ class CongestionAnalyzer:
         self._entry_count = 0
         self._exit_count = 0
         self._last_count_reset = time.time()
+        self._seen_entry_ids: set = set()  # Prevent double-counting
         
         logger.info(f"CongestionAnalyzer | area={roi_area}m² | free_flow={free_flow_speed}km/h")
     
@@ -112,8 +113,12 @@ class CongestionAnalyzer:
         if elapsed < 1:
             return 0.0
         
-        # Count vehicles that have been active briefly (just entered)
-        new_vehicles = sum(1 for t in tracks if t.duration < 2.0)
+        # Count vehicles that have been active briefly (just entered) - deduplicated
+        new_vehicles = 0
+        for t in tracks:
+            if t.duration < 2.0 and t.track_id not in self._seen_entry_ids:
+                new_vehicles += 1
+                self._seen_entry_ids.add(t.track_id)
         
         # Reset every minute
         if elapsed >= 60:

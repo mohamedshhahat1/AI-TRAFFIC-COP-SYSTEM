@@ -114,8 +114,15 @@ export async function fetchEventHistory(topic = 'violation.*', limit = 20) {
 
 export function connectWebSocket(onMessage, onError = null) {
   let ws;
+  let reconnectTimer = null;
+  let isClosedManually = false;
   
   function connect() {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    
     ws = new WebSocket(WS_URL);
     
     ws.onopen = () => {
@@ -132,8 +139,10 @@ export function connectWebSocket(onMessage, onError = null) {
     };
     
     ws.onclose = () => {
-      console.log('WebSocket disconnected. Reconnecting in 5s...');
-      setTimeout(connect, 5000);
+      if (!isClosedManually) {
+        console.log('WebSocket disconnected. Reconnecting in 5s...');
+        reconnectTimer = setTimeout(connect, 5000);
+      }
     };
     
     ws.onerror = (error) => {
@@ -143,5 +152,11 @@ export function connectWebSocket(onMessage, onError = null) {
   }
   
   connect();
-  return { close: () => ws && ws.close() };
+  return { 
+    close: () => { 
+      isClosedManually = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) ws.close(); 
+    } 
+  };
 }

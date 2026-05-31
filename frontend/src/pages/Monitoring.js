@@ -98,7 +98,7 @@ function Monitoring() {
           </div>
           <div className="metric-card">
             <h3>Error Rate</h3>
-            <span className="metric-value">{(metrics.error_rate * 100 || 0).toFixed(2)}%</span>
+            <span className="metric-value">{((metrics.error_rate ?? 0) * 100).toFixed(2)}%</span>
           </div>
         </div>
       </section>

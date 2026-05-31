@@ -84,8 +84,9 @@ class ParkingViolationDetector:
         
         for zone in self.forbidden_zones:
             if len(zone) >= 3:
-                pts = np.array(zone, dtype=np.int32)
-                if cv2.pointPolygonTest(pts, pos, False) >= 0:
+                pts = np.array(zone, dtype=np.int32).reshape((-1, 1, 2))
+                point = (float(pos[0]), float(pos[1]))
+                if cv2.pointPolygonTest(pts, point, False) >= 0:
                     return True
         return False
     

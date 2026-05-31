@@ -79,7 +79,7 @@ async def startup():
 
         # Subscribe to Event Bus → broadcast to WebSocket clients
         # Use call_soon_threadsafe since Event Bus may fire from non-asyncio threads
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
         ai_gateway.on_violation(
             lambda v: loop.call_soon_threadsafe(asyncio.ensure_future, broadcast({"type": "violation", "data": v}))

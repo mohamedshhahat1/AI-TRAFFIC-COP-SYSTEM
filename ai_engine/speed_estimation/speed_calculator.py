@@ -72,8 +72,17 @@ class SpeedCalculator:
         if dt <= 0:
             return 0.0
         
-        # Convert to real distance
-        distance_m = total_px * self.pixel_to_meter
+        # Convert to real distance (use perspective transform if calibrated)
+        if self._perspective_matrix is not None:
+            start_pt = np.array([[positions[0]]], dtype=np.float32)
+            end_pt = np.array([[positions[-1]]], dtype=np.float32)
+            t_start_pt = cv2.perspectiveTransform(start_pt, self._perspective_matrix)
+            t_end_pt = cv2.perspectiveTransform(end_pt, self._perspective_matrix)
+            dx = t_end_pt[0][0][0] - t_start_pt[0][0][0]
+            dy = t_end_pt[0][0][1] - t_start_pt[0][0][1]
+            distance_m = np.sqrt(dx**2 + dy**2)
+        else:
+            distance_m = total_px * self.pixel_to_meter
         
         # Speed: m/s → km/h
         speed_ms = distance_m / dt

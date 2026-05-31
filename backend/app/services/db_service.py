@@ -15,10 +15,15 @@ async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit
 
 async def init_db():
     """Initialize database tables."""
-    from ..models.violation_model import Base
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database initialized")
+    try:
+        from ..models.violation_model import Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database initialized")
+    except ImportError as e:
+        logger.warning(f"Could not initialize DB models: {e}")
+    except Exception as e:
+        logger.error(f"Database init failed: {e}")
 
 
 async def get_session():

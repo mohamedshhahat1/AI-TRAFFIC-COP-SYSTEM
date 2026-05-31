@@ -138,6 +138,7 @@ class ViolationEngine:
                     track_id=rl.track_id,
                     vehicle_class=rl.vehicle_class,
                     speed=rl.speed,
+                    speed_limit=self.speed_detector.speed_limit,
                     location=rl.location,
                     bbox=rl.bbox,
                     description=f"Ran red light at {rl.speed:.1f}km/h",

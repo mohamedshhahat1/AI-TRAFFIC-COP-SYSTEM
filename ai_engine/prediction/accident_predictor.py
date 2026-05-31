@@ -49,8 +49,9 @@ class AccidentPredictor:
         self.proximity_threshold = proximity_threshold
         self.prediction_horizon = prediction_horizon
         
-        self.risk_history: List[AccidentRisk] = []
+        self.risk_history: List[AccidentRisk] = []  # Pruned periodically
         self._alerts_sent: Dict[str, float] = {}
+        self._prev_speeds: Dict[int, float] = {}  # track_id -> previous speed
         
         logger.info("AccidentPredictor initialized")
     
@@ -83,6 +84,9 @@ class AccidentPredictor:
                 risks.append(risk)
         
         self.risk_history.extend(risks)
+        # Prune old entries (keep last 500)
+        if len(self.risk_history) > 500:
+            self.risk_history = self.risk_history[-500:]
         return risks
     
     def _assess_pair(self, track_a, track_b) -> Optional[AccidentRisk]:
@@ -155,9 +159,10 @@ class AccidentPredictor:
             return None
         
         # Detect sudden deceleration (hard braking)
-        if hasattr(track, '_prev_speed'):
-            speed_change = track._prev_speed - track.current_speed
+        if track.track_id in self._prev_speeds:
+            speed_change = self._prev_speeds[track.track_id] - track.current_speed
             if speed_change > 30:  # Sudden 30km/h drop
+                self._prev_speeds[track.track_id] = track.current_speed
                 return AccidentRisk(
                     risk_level="medium",
                     risk_score=0.6,
@@ -168,7 +173,7 @@ class AccidentPredictor:
                     timestamp=time.time(),
                 )
         
-        track._prev_speed = track.current_speed
+        self._prev_speeds[track.track_id] = track.current_speed
         
         # Detect swerving (erratic lateral movement)
         recent_x = [p[0] for p in track.positions[-10:]]
@@ -227,8 +232,8 @@ class AccidentPredictor:
         if t_min < 0:
             return None  # Already diverging
         
-        # Convert frame-time to seconds (approximate)
-        ttc_seconds = t_min / 30.0 * self.prediction_horizon
+        # t_min is in frame units; convert to seconds (assuming ~30fps)
+        ttc_seconds = t_min / 30.0
         
         return ttc_seconds
     

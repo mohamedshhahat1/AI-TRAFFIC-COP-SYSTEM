@@ -20,7 +20,6 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 try:
-    from ai_engine.monitoring.logger import SystemLogger
     logger = SystemLogger("inference_service")
 except ImportError:
     from loguru import logger
@@ -99,7 +98,7 @@ class InferenceService:
         self._metrics = MetricsCollector()
         
         # AI Pipeline (the actual brain)
-        self._pipeline: Optional[AIPipeline] = None
+        self._pipeline = None  # Type: Optional[AIPipeline] (lazy imported)
         
         # Job management
         self._job_queue: Queue = Queue(maxsize=100)

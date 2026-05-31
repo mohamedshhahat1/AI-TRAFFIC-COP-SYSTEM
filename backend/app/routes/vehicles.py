@@ -1,6 +1,6 @@
 """Vehicles API endpoints."""
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
 
 router = APIRouter()
@@ -26,7 +26,7 @@ async def get_vehicle(track_id: int):
     for v in _vehicles:
         if v.get("track_id") == track_id:
             return v
-    return {"error": "Not found"}
+    raise HTTPException(status_code=404, detail="Vehicle not found")
 
 
 @router.get("/{track_id}/history")
