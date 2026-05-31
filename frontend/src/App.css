@@ -622,3 +622,23 @@ tr:hover { background: rgba(255,255,255,0.02); }
   background: none !important;
   font-size: 1rem;
 }
+
+/* Results & Evaluation Page */
+.results-page { padding-bottom: 40px; }
+.results-page h1 { margin-bottom: 4px; }
+.results-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+
+.results-table { padding: 0 20px 20px; overflow-x: auto; }
+.results-table table { width: 100%; }
+.results-table th { text-align: left; padding: 10px 14px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.results-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+
+.results-icon { font-size: 1.3rem; width: 40px; }
+.results-label { font-weight: 600; font-size: 0.9rem; }
+.results-value { font-size: 1.1rem; font-weight: bold; color: #4285f4; }
+.results-note { font-size: 0.75rem; color: var(--text-muted); max-width: 250px; }
+
+.results-note-panel { border: 1px solid rgba(251, 188, 4, 0.3); }
+.results-academic { padding: 16px 20px; font-size: 0.85rem; line-height: 1.8; }
+.results-academic p { margin-bottom: 8px; }
+.results-academic code { background: var(--dark); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
