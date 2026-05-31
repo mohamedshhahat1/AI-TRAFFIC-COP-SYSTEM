@@ -1,32 +1,28 @@
-# AI Traffic Cop System - Main Settings
-system:
-  name: "AI Traffic Cop System"
-  version: "1.0.0"
-  debug: false
-  log_level: "INFO"
-
 camera:
-  source: "data/videos/sample.mp4"
-  resolution: [1280, 720]
   fps: 30
-
+  resolution:
+  - 1280
+  - 720
+  source: data/videos/sample.mp4
 detection:
-  model: "yolov8n"
-  confidence: 0.5
-  device: "auto"
-
-tracking:
-  max_age: 30
-  embedder: "mobilenet"
-
+  confidence: 0.25
+  device: auto
+  model: yolov8n
 speed:
   limit: 60
-  tolerance: 5
   pixel_to_meter: 0.05
-
+  tolerance: 5
+system:
+  debug: false
+  log_level: INFO
+  name: AI Traffic Cop System
+  version: 1.0.0
+tracking:
+  embedder: mobilenet
+  max_age: 30
 violations:
-  speed_enabled: true
-  red_light_enabled: true
   lane_enabled: true
-  parking_enabled: true
   max_stationary_seconds: 30
+  parking_enabled: true
+  red_light_enabled: true
+  speed_enabled: true
