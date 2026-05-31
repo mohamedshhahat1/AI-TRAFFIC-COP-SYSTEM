@@ -562,6 +562,70 @@ violations:
 
 ---
 
+---
+
+## 📦 Training Datasets
+
+### 🏆 Best Free Datasets (Ready for YOLOv8)
+
+#### 1. Roboflow Universe (RECOMMENDED — Easiest)
+| Dataset | Link | Contents |
+|---------|------|----------|
+| Traffic Detection | [roboflow.com/traffic](https://universe.roboflow.com/search?q=traffic) | Cars, trucks, buses, motorcycles |
+| Traffic Lights | [roboflow.com/traffic-light](https://universe.roboflow.com/search?q=traffic+light) | Red/green/yellow states |
+| Vehicle Detection | [roboflow.com/vehicle](https://universe.roboflow.com/search?q=vehicle+detection) | Multi-class vehicles |
+
+> ✅ Export directly in **YOLO format** — no conversion needed
+
+#### 2. Kaggle Datasets
+| Dataset | Link |
+|---------|------|
+| Road Vehicle Images | [kaggle.com/road-vehicles](https://www.kaggle.com/datasets/ashfakyeafi/road-vehicle-images-dataset) |
+| Car Object Detection | [kaggle.com/car-detection](https://www.kaggle.com/datasets/sshikamaru/car-object-detection) |
+| Speed Estimation | [kaggle.com/speed-estimation](https://www.kaggle.com/datasets/kmader/speed-estimation-dataset) |
+| LISA Traffic Lights | [kaggle.com/lisa-traffic](https://www.kaggle.com/datasets/mbornoe/lisa-traffic-light-dataset) |
+
+#### 3. Research Datasets
+| Dataset | Description | Link |
+|---------|-------------|------|
+| **COCO** | 80 classes (cars, trucks, traffic lights) | [cocodataset.org](https://cocodataset.org) |
+| **KITTI** | Self-driving car data | [cvlibs.net/kitti](https://www.cvlibs.net/datasets/kitti/) |
+| **BDD100K** | 100K driving videos with labels | [bdd100k.com](https://www.bdd100k.com) |
+| **UA-DETRAC** | Traffic surveillance + tracking | [detrac-db.rit.albany.edu](https://detrac-db.rit.albany.edu) |
+
+#### 4. YouTube Videos (for testing)
+Search: "traffic camera footage 4K", "intersection camera", "dashcam compilation"
+
+### ⚡ Quickest Path (5 min to start training)
+
+```bash
+# 1. Go to: https://universe.roboflow.com/search?q=traffic+vehicle+detection
+# 2. Pick dataset → Download → Select "YOLOv8" format
+# 3. Extract:
+unzip dataset.zip -d data/annotations/
+
+# 4. Structure should be:
+# data/annotations/
+# ├── data.yaml (rename to dataset.yaml)
+# ├── train/images/ + train/labels/
+# └── valid/images/ + valid/labels/
+
+# 5. Train!
+python scripts/train_model.py
+```
+
+### 📝 Label Your Own Data
+1. Record traffic video (phone or YouTube)
+2. Extract frames: `ffmpeg -i video.mp4 -vf "fps=2" frames/frame_%04d.jpg`
+3. Label at [app.roboflow.com](https://app.roboflow.com) → export YOLO format
+4. Train: `python scripts/train_model.py`
+
+### 💡 Tips
+- **Start small**: 200-500 images is enough for a demo
+- **YOLOv8 pre-trained** already knows cars/trucks — fine-tuning improves your camera angle
+- **Roboflow** has free augmentation (flip, rotate, blur) that 3x your dataset
+- **Speed estimation** needs no labeled data — just calibrate `pixel_to_meter`
+
 ## 📡 API Endpoints
 
 | Method | Endpoint | Description |
