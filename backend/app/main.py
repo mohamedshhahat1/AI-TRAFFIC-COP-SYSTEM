@@ -204,6 +204,14 @@ async def camera_stats():
     return {"running": False, "fps": 0, "objects": 0, "tracks": 0, "frame": 0}
 
 
+@app.get("/api/camera/info")
+async def camera_info():
+    """Get camera source information (resolution, FPS, status)."""
+    if video_processor:
+        return video_processor.camera_info
+    return {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
+
+
 
 
 @app.post("/api/camera/upload")

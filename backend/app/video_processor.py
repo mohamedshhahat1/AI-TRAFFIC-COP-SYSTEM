@@ -27,6 +27,7 @@ class VideoProcessor:
         self._source = None
         self._loop = None
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
+        self.camera_info = {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
         self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
     
     def start(self, source: str = "data/videos/traffic.mp4"):
@@ -62,6 +63,16 @@ class VideoProcessor:
             logger.error(f"Cannot open video: {self._source}")
             self._running = False
             return
+        
+        # Get camera/video info
+        self.camera_info = {
+            "source": self._source,
+            "name": self._source.split("/")[-1] if "/" in self._source else f"CAM_{self._source}",
+            "resolution": f"{int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))}x{int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))}",
+            "fps": int(cap.get(cv2.CAP_PROP_FPS)),
+            "total_frames": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+            "status": "Connected",
+        }
         
         fps_counter = 0
         fps_start = time.time()

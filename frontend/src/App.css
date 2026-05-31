@@ -480,3 +480,22 @@ tr:hover { background: rgba(255,255,255,0.02); }
   font-size: 0.7rem;
   color: var(--text-muted);
 }
+
+/* Camera Info Bar */
+.camera-info-bar {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 8px 12px;
+  margin-top: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.camera-info-bar span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

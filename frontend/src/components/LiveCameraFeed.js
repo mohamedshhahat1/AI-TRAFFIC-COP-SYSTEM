@@ -8,12 +8,16 @@ function LiveCameraFeed() {
   const [status, setStatus] = useState('');
   const [stats, setStats] = useState({ fps: 0, objects: 0, tracks: 0, frame: 0, violations: 0 });
   const [uploading, setUploading] = useState(false);
+  const [cameraInfo, setCameraInfo] = useState({});
   const pollRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // Poll /api/camera/stats every 500ms when live
   useEffect(() => {
     if (isLive) {
+      // Fetch camera info once
+      fetch(`${API_BASE}/camera/info`).then(r => r.json()).then(setCameraInfo).catch(() => {});
+      
       pollRef.current = setInterval(async () => {
         try {
           const res = await fetch(`${API_BASE}/camera/stats`);
@@ -124,6 +128,15 @@ function LiveCameraFeed() {
                 Congestion: {stats.congestion.toUpperCase()}
               </p>
             )}
+            {/* Camera Source Info */}
+            <div className="camera-info-bar">
+              <span>📹 {cameraInfo.name || 'Unknown'}</span>
+              <span>🖥️ {cameraInfo.resolution || '—'}</span>
+              <span>🎬 {cameraInfo.fps || 0} FPS</span>
+              <span style={{color: cameraInfo.status === 'Connected' ? '#34a853' : '#ea4335'}}>
+                ● {cameraInfo.status || 'Disconnected'}
+              </span>
+            </div>
           </div>
         ) : (
           <div className="feed-placeholder">
