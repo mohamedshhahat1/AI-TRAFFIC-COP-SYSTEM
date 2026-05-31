@@ -7,6 +7,7 @@ import EventFeed from '../components/EventFeed';
 import { fetchStats, fetchViolations, fetchHealth, connectWebSocket } from '../services/api';
 import DetectionStats from '../components/DetectionStats';
 import AccidentRiskPanel from '../components/AccidentRiskPanel';
+import TrafficHeatmap from '../components/TrafficHeatmap';
 
 function Dashboard() {
   const [stats, setStats] = useState({});
@@ -85,6 +86,8 @@ function Dashboard() {
       <DetectionStats counts={detectionCounts} />
       
       <AccidentRiskPanel risks={accidentRisks} currentRisk={currentRisk} />
+      
+      <TrafficHeatmap />
       
       <ViolationTable violations={violations} title="Recent Violations" />
     </div>

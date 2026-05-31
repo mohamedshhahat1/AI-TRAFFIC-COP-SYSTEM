@@ -418,3 +418,65 @@ tr:hover { background: rgba(255,255,255,0.02); }
 .risk-indicator[style*="rgba(255,0,0"] {
   animation: pulse-risk 1.5s infinite;
 }
+
+/* Traffic Heatmap */
+.heatmap-content {
+  padding: 12px 20px;
+}
+
+.heatmap-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.heatmap-row:last-child { border-bottom: none; }
+
+.heatmap-rank {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-width: 24px;
+  font-weight: bold;
+}
+
+.heatmap-info {
+  flex: 1;
+}
+
+.heatmap-name {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.heatmap-bar-container {
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.heatmap-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.heatmap-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 80px;
+}
+
+.heatmap-pct {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.heatmap-vehicles {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
