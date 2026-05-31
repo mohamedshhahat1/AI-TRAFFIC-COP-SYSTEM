@@ -113,9 +113,9 @@ export async function fetchEventHistory(topic = 'violation.*', limit = 20) {
 
 // ==================== Camera Control ====================
 
-export async function startCamera() {
+export async function startCamera(source = 'data/videos/traffic.mp4') {
   try {
-    const res = await fetch(`${API_BASE}/camera/start`, { method: 'POST' });
+    const res = await fetch(`${API_BASE}/camera/start?source=${encodeURIComponent(source)}`, { method: 'POST' });
     return await res.json();
   } catch (err) {
     console.error('Failed to start camera:', err);

@@ -7,7 +7,9 @@ function LiveCameraFeed() {
   const [isLive, setIsLive] = useState(false);
   const [status, setStatus] = useState('');
   const [stats, setStats] = useState({ fps: 0, objects: 0, tracks: 0, frame: 0, violations: 0 });
+  const [uploading, setUploading] = useState(false);
   const pollRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Poll /api/camera/stats every 500ms when live
   useEffect(() => {
@@ -17,9 +19,6 @@ function LiveCameraFeed() {
           const res = await fetch(`${API_BASE}/camera/stats`);
           const data = await res.json();
           setStats(data);
-          if (!data.running) {
-            setStatus('Video ended');
-          }
         } catch (e) {}
       }, 500);
     } else {
@@ -28,12 +27,49 @@ function LiveCameraFeed() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [isLive]);
 
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    setStatus(`Uploading ${file.name}...`);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch(`${API_BASE}/camera/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.status === 'uploaded') {
+        setStatus(`✅ ${file.name} uploaded! Click Start to process.`);
+        // Auto-start processing with uploaded video
+        const startRes = await startCamera(data.path);
+        if (startRes.status === 'started') {
+          setIsLive(true);
+          setStatus(`🟢 Processing ${file.name}`);
+        }
+      } else {
+        setStatus(`❌ Upload failed: ${data.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      setStatus(`❌ Upload error: ${err.message}`);
+    }
+    setUploading(false);
+  };
+
   const handleStart = async () => {
     setStatus('Starting AI pipeline...');
     const result = await startCamera();
     if (result.status === 'started') {
       setIsLive(true);
       setStatus('🟢 Processing video frames');
+    } else if (result.status === 'already_running') {
+      setIsLive(true);
+      setStatus('🟢 Already running');
     } else {
       setStatus(result.message || 'Failed to start');
     }
@@ -54,6 +90,21 @@ function LiveCameraFeed() {
         <div className="camera-controls">
           <button className="btn btn-success" onClick={handleStart} disabled={isLive}>▶ Start</button>
           <button className="btn btn-danger" onClick={handleStop} disabled={!isLive}>⬛ Stop</button>
+          <button 
+            className="btn" 
+            onClick={() => fileInputRef.current.click()} 
+            disabled={uploading}
+            style={{background: '#4285f4', color: '#fff'}}
+          >
+            📁 Upload Video
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/*"
+            onChange={handleUpload}
+            style={{display: 'none'}}
+          />
         </div>
       </div>
       <div className="camera-feed">
@@ -76,8 +127,8 @@ function LiveCameraFeed() {
           </div>
         ) : (
           <div className="feed-placeholder">
-            <p>📷 Click Start to begin monitoring</p>
-            <small>AI Gateway → YOLOv8 → Event Bus → Dashboard</small>
+            <p>📷 Upload a traffic video or click Start</p>
+            <small>Supports: .mp4, .avi, .mkv</small>
             {status && <p style={{color: '#fbbc04', marginTop: 10}}>{status}</p>}
           </div>
         )}

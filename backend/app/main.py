@@ -14,7 +14,7 @@ import os
 import asyncio
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 try:
@@ -203,6 +203,29 @@ async def camera_stats():
         return {"running": True, **video_processor.stats}
     return {"running": False, "fps": 0, "objects": 0, "tracks": 0, "frame": 0}
 
+
+
+
+@app.post("/api/camera/upload")
+async def upload_video(file: UploadFile = File(...)):
+    """Upload a traffic video for AI processing."""
+    from pathlib import Path
+    import shutil
+    
+    # Save uploaded file
+    upload_dir = Path("data/videos")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    file_path = upload_dir / file.filename
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    
+    return {
+        "status": "uploaded",
+        "filename": file.filename,
+        "path": str(file_path),
+        "message": f"Video uploaded. Start processing with POST /api/camera/start?source={file_path}"
+    }
 
 @app.websocket("/ws/live")
 async def websocket_endpoint(websocket: WebSocket):
