@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Models (large files)
+models/*.pt
+models/*.onnx
+models/*.engine
+!models/.gitkeep
+
+# Data
+data/videos/*.mp4
+data/videos/*.avi
+data/images/*.jpg
+data/images/*.png
+data/violations/*.jpg
+!data/videos/.gitkeep
+!data/images/.gitkeep
+!data/violations/.gitkeep
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+*.pem
+*.key
+secrets.yaml
