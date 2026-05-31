@@ -40,6 +40,16 @@ app = FastAPI(
     redoc_url="/api/redoc",
 )
 
+# API request counter
+_api_request_count = 0
+
+@app.middleware("http")
+async def count_requests(request, call_next):
+    global _api_request_count
+    _api_request_count += 1
+    response = await call_next(request)
+    return response
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -145,6 +155,12 @@ async def root():
         <p>Frontend: <a href="http://localhost:3000" style="color:#4285f4;">http://localhost:3000</a></p>
     </body></html>
     """
+
+
+@app.get("/api/stats/requests")
+async def api_request_count():
+    """Get total API requests served."""
+    return {"total_requests": _api_request_count}
 
 
 @app.get("/api/health")

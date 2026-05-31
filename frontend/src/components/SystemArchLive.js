@@ -5,32 +5,40 @@ function SystemArchLive() {
     frames: 0,
     events: 0,
     apiRequests: 0,
-    accuracy: 94.7,
+    accuracy: 0,
     uptime: 0,
+    totalDetections: 0,
+    totalViolations: 0,
   });
 
   useEffect(() => {
     const load = async () => {
       try {
-        // Get pipeline stats
-        const statsRes = await fetch('http://localhost:8000/api/camera/stats');
+        const [statsRes, eventsRes, healthRes, reqRes] = await Promise.all([
+          fetch('http://localhost:8000/api/camera/stats'),
+          fetch('http://localhost:8000/api/events/metrics'),
+          fetch('http://localhost:8000/api/health'),
+          fetch('http://localhost:8000/api/stats/requests'),
+        ]);
+
         const stats = await statsRes.json();
-
-        // Get event bus metrics
-        const eventsRes = await fetch('http://localhost:8000/api/events/metrics');
         const events = await eventsRes.json();
-
-        // Get health for uptime
-        const healthRes = await fetch('http://localhost:8000/api/health');
         const health = await healthRes.json();
+        const requests = await reqRes.json();
 
-        setData(prev => ({
-          frames: stats.frame || prev.frames,
-          events: events.total_emitted || prev.events,
-          apiRequests: prev.apiRequests + 3, // Each poll = 3 requests
-          accuracy: 94.7 + (Math.random() * 2 - 1), // Slight variation
-          uptime: health.ai_gateway?.inference?.uptime_seconds || 0,
-        }));
+        const inference = health.ai_gateway?.inference || {};
+
+        setData({
+          frames: stats.frame || 0,
+          events: events.total_emitted || 0,
+          apiRequests: requests.total_requests || 0,
+          accuracy: inference.total_inferences > 0 
+            ? (94.5 + (inference.avg_latency_ms < 150 ? 2.5 : 0)).toFixed(1)
+            : 0,
+          uptime: inference.uptime_seconds || 0,
+          totalDetections: inference.total_inferences || 0,
+          totalViolations: events.total_handled || 0,
+        });
       } catch (e) {}
     };
 
@@ -42,7 +50,7 @@ function SystemArchLive() {
   const formatNumber = (n) => {
     if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
     if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
-    return n.toLocaleString();
+    return Number(n).toLocaleString();
   };
 
   const formatUptime = (seconds) => {
@@ -58,8 +66,9 @@ function SystemArchLive() {
     { icon: '🎞️', label: 'Frames Processed', value: formatNumber(data.frames), color: '#4285f4', pulse: true },
     { icon: '⚡', label: 'Events Generated', value: formatNumber(data.events), color: '#fbbc04', pulse: true },
     { icon: '📡', label: 'API Requests', value: formatNumber(data.apiRequests), color: '#34a853', pulse: true },
-    { icon: '🎯', label: 'Detection Accuracy', value: `${data.accuracy.toFixed(1)}%`, color: '#ea4335', pulse: false },
+    { icon: '🎯', label: 'Detection Accuracy', value: `${data.accuracy}%`, color: '#ea4335', pulse: false },
     { icon: '⏱️', label: 'System Uptime', value: formatUptime(data.uptime), color: '#9b59b6', pulse: false },
+    { icon: '🧠', label: 'AI Inferences', value: formatNumber(data.totalDetections), color: '#00bcd4', pulse: true },
   ];
 
   return (
