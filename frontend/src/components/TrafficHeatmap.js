@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-function TrafficHeatmap({ zones = [] }) {
-  // Default zones if none provided (simulated from multi-camera data)
+function TrafficHeatmap() {
+  const [zones, setZones] = useState([]);
+
+  useEffect(() => {
+    const loadZones = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/analytics/heatmap');
+        const data = await res.json();
+        if (data.zones && data.zones.length > 0) {
+          setZones(data.zones);
+        }
+      } catch (e) {}
+    };
+    loadZones();
+    const interval = setInterval(loadZones, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fallback demo data if backend returns empty
   const defaultZones = [
     { name: 'Main Street Intersection', congestion: 85, vehicles: 34, status: 'heavy' },
     { name: 'Highway Exit 5', congestion: 63, vehicles: 21, status: 'moderate' },
