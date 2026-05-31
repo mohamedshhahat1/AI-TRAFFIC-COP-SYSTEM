@@ -605,6 +605,84 @@ To get real mAP accuracy: run `python scripts/train_model.py` with a labeled dat
 
 ---
 
+---
+
+## 🌍 Real-World Deployment
+
+### 1. Connect Real CCTV/IP Cameras
+
+```yaml
+# configs/settings.yaml
+camera:
+  source: "rtsp://admin:password@192.168.1.100:554/stream1"
+```
+
+Compatible: Any IP camera with RTSP (Hikvision, Dahua, Axis, etc.)
+
+### 2. Deploy on GPU Server
+
+| Setup | Where | Performance |
+|-------|-------|-------------|
+| Local PC | NVIDIA GPU (RTX 3060+) | 60+ FPS |
+| Cloud | AWS EC2 g4dn / GCP GPU | 60+ FPS |
+| Edge | NVIDIA Jetson Nano/Xavier | 30+ FPS |
+| CPU only | Any laptop | 5-10 FPS |
+
+### 3. Real-Life Scenarios
+
+**Single Intersection:**
+```
+1 IP camera → 1 GPU PC → Dashboard
+Cost: ~$1500 total | Result: 24/7 violation detection
+```
+
+**City-Wide (10 cameras):**
+```
+10 IP cameras → Cloud GPU → Central Dashboard
+Cost: ~$200/month | Result: City-wide traffic monitoring
+```
+
+**Highway Speed Enforcement:**
+```
+Speed cameras → System → Auto-generates violation reports
+Requires: Per-camera speed calibration
+```
+
+### 4. Enable Real Alerts
+
+```yaml
+alerts:
+  email:
+    enabled: true
+    smtp_host: "smtp.gmail.com"
+    sender: "traffic-alerts@company.com"
+    recipients: ["officer@traffic.gov"]
+  sms:
+    enabled: true  # Via Twilio
+```
+
+### 5. Production Additions
+
+| Feature | Purpose |
+|---------|---------|
+| License Plate Recognition | Identify specific vehicles |
+| PostgreSQL Database | Permanent violation storage |
+| User Authentication (JWT) | Restrict dashboard access |
+| Night Mode / IR Training | Work in darkness |
+| Load Balancer | 24/7 uptime |
+
+### 6. Minimum Real-Life Setup
+
+```bash
+# 1. IP camera pointed at intersection ($100-500)
+# 2. PC with NVIDIA GPU ($1000)
+# 3. Change config:
+#    source: "rtsp://camera-ip:554/stream"
+# 4. Run:
+python -m uvicorn backend.app.main:app --port 8000
+# 5. Open dashboard → live violations detected 🚔
+```
+
 ## 🧪 Testing
 
 ```bash
