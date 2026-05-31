@@ -138,33 +138,13 @@ async def shutdown():
     logger.info("🛑 API server stopped")
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def root():
-    ai_status = "🟢 Active" if ai_gateway else "🔴 Inactive"
-    return f"""
-    <html><head><title>AI Traffic Cop API</title></head>
-    <body style="font-family:sans-serif;background:#1e1e2e;color:#fff;padding:40px;">
-        <h1>🚔 AI Traffic Cop System API</h1>
-        <p>Smart Traffic Enforcement & Analytics</p>
-        <p><b>AI Gateway:</b> {ai_status}</p>
-        <p><b>Architecture:</b> Event-Driven + API Gateway</p>
-        <ul>
-            <li><a href="/api/docs" style="color:#4285f4;">📖 Swagger Docs</a></li>
-            <li><a href="/api/redoc" style="color:#4285f4;">📋 ReDoc</a></li>
-            <li><a href="/api/violations" style="color:#4285f4;">🚨 Violations</a></li>
-            <li><a href="/api/analytics" style="color:#4285f4;">📊 Analytics</a></li>
-            <li><a href="/api/health" style="color:#4285f4;">❤️ Health</a></li>
-            <li><a href="/api/analytics/metrics" style="color:#4285f4;">📈 Metrics</a></li>
-        </ul>
-        <h3>Event-Driven Flow:</h3>
-        <pre style="background:#2d2d3f;padding:15px;border-radius:8px;">
-AI Engine → Event Bus → Backend (this API)
-                     → Alert Service (email/SMS)
-                     → Dashboard (WebSocket)
-                     → Database (storage)
-        </pre>
-    </body></html>
-    """
+    """Serve React dashboard (single-port deployment)."""
+    index_path = _frontend_build / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    return HTMLResponse("<h1>Frontend not built. Run: cd frontend && npm run build</h1>")
 
 
 @app.get("/api/health")
