@@ -6,6 +6,7 @@ import HealthIndicator from '../components/HealthIndicator';
 import EventFeed from '../components/EventFeed';
 import { fetchStats, fetchViolations, fetchHealth, connectWebSocket } from '../services/api';
 import DetectionStats from '../components/DetectionStats';
+import AccidentRiskPanel from '../components/AccidentRiskPanel';
 
 function Dashboard() {
   const [stats, setStats] = useState({});
@@ -13,6 +14,8 @@ function Dashboard() {
   const [health, setHealth] = useState({ status: 'loading', score: 0 });
   const [liveEvents, setLiveEvents] = useState([]);
   const [detectionCounts, setDetectionCounts] = useState({});
+  const [accidentRisks, setAccidentRisks] = useState([]);
+  const [currentRisk, setCurrentRisk] = useState({ level: 'low', score: 0, active: 0 });
 
   useEffect(() => {
     const loadData = async () => {
@@ -44,6 +47,15 @@ function Dashboard() {
       if (event.type === 'frame_update' && event.data?.detection_counts) {
         setDetectionCounts(event.data.detection_counts);
       }
+      // Capture accident risks
+      if (event.type === 'accident_risk') {
+        setAccidentRisks(prev => [event.data, ...prev].slice(0, 10));
+        setCurrentRisk({
+          level: event.data.level || 'medium',
+          score: event.data.score || event.data.risk_score || 0.5,
+          active: accidentRisks.length + 1,
+        });
+      }
       // Auto-refresh on new violation
       if (event.type === 'violation') {
         loadData();
@@ -71,6 +83,8 @@ function Dashboard() {
       </div>
       
       <DetectionStats counts={detectionCounts} />
+      
+      <AccidentRiskPanel risks={accidentRisks} currentRisk={currentRisk} />
       
       <ViolationTable violations={violations} title="Recent Violations" />
     </div>

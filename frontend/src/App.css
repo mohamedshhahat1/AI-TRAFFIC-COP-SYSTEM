@@ -317,3 +317,104 @@ tr:hover { background: rgba(255,255,255,0.02); }
   border-radius: 0 3px 3px 0;
   transition: width 0.3s;
 }
+
+/* Accident Risk Panel */
+.risk-content {
+  padding: 16px 20px;
+}
+
+.risk-indicator {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid;
+  margin-bottom: 16px;
+}
+
+.risk-icon { font-size: 2.5rem; }
+
+.risk-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.risk-level {
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.risk-score {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.risk-gauge {
+  width: 120px;
+}
+
+.risk-gauge-bg {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.risk-gauge-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.risk-events {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.risk-event-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--dark);
+  border-radius: 8px;
+  border-left: 3px solid;
+}
+
+.risk-event-icon { font-size: 1.2rem; }
+
+.risk-event-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.risk-event-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.risk-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+}
+
+.risk-empty small {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+}
+
+@keyframes pulse-risk {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.risk-indicator[style*="rgba(255,0,0"] {
+  animation: pulse-risk 1.5s infinite;
+}

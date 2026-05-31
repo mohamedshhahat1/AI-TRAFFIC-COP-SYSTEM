@@ -135,7 +135,13 @@ class VideoProcessor:
                 raw_risks = raw_risks.get("items", [])
             for r in raw_risks:
                 if hasattr(r, 'risk_level'):
-                    self._send_update({"type": "accident_risk", "data": {"level": r.risk_level, "vehicles": r.involved_vehicles, "ttc": r.time_to_collision}})
+                    self._send_update({"type": "accident_risk", "data": {
+                        "level": r.risk_level,
+                        "score": r.risk_score,
+                        "vehicles": r.involved_vehicles,
+                        "ttc": r.time_to_collision,
+                        "description": r.description if hasattr(r, 'description') else "",
+                    }})
                 elif isinstance(r, dict):
                     self._send_update({"type": "accident_risk", "data": r})
             
