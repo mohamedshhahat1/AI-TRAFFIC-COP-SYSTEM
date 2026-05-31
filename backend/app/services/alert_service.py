@@ -4,7 +4,11 @@ import asyncio
 import smtplib
 from email.mime.text import MIMEText
 from typing import List
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("alert_service")
+except ImportError:
+    from loguru import logger
 import time
 
 

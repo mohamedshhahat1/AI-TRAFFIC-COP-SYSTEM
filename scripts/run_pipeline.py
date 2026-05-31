@@ -13,7 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # Project root
 from ai_engine.api_bridge import AIGateway
 from ai_engine.event_bus import EventManager, TrafficEvent
 import cv2
-from loguru import logger
+try:
+    from ai_engine.monitoring.logger import SystemLogger
+    logger = SystemLogger("run_pipeline")
+except ImportError:
+    from loguru import logger
 import yaml
 
 
