@@ -193,11 +193,15 @@ class VideoProcessor:
                             })
                             # Keep last 10
                             self._last_plates = self._last_plates[-10:]
-                            # Draw plate on annotated frame
+                            # Draw plate on annotated frame (cyan background for visibility)
                             if hasattr(track, 'bbox'):
                                 x1, y1, x2, y2 = track.bbox
-                                cv2.putText(annotated, f"PLATE: {plate_result.plate_number}", (x1, y2 + 55),
-                                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+                                plate_text = f"PLATE: {plate_result.plate_number}"
+                                (tw, th), _ = cv2.getTextSize(plate_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+                                # Draw above the vehicle ID label
+                                cv2.rectangle(annotated, (x1, y1 - th - 30), (x1 + tw + 6, y1 - 18), (0, 200, 200), -1)
+                                cv2.putText(annotated, plate_text, (x1 + 3, y1 - 22),
+                                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
             # Encode as JPEG for streaming
             _, jpeg = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 70])
