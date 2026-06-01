@@ -8,6 +8,7 @@ import { fetchStats, fetchViolations, fetchHealth, connectWebSocket } from '../s
 import DetectionStats from '../components/DetectionStats';
 import AccidentRiskPanel from '../components/AccidentRiskPanel';
 import TrafficHeatmap from '../components/TrafficHeatmap';
+import DetectedPlates from '../components/DetectedPlates';
 import SystemArchLive from '../components/SystemArchLive';
 
 function Dashboard() {
@@ -90,6 +91,8 @@ function Dashboard() {
       <DetectionStats counts={detectionCounts} />
       
       <AccidentRiskPanel risks={accidentRisks} currentRisk={currentRisk} />
+      
+      <DetectedPlates />
       
       <TrafficHeatmap />
       
