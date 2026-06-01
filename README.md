@@ -683,6 +683,58 @@ python -m uvicorn backend.app.main:app --port 8000
 # 5. Open dashboard → live violations detected 🚔
 ```
 
+---
+
+## 📷 Multi-Camera Setup
+
+### Add Videos to All 4 Cameras
+
+**Step 1:** Put video files in `data/videos/`:
+```
+data/videos/
+├── cam1_main_street.mp4
+├── cam2_highway.mp4
+├── cam3_school.mp4
+└── cam4_downtown.mp4
+```
+
+**Step 2:** Update `configs/camera_config.yaml`:
+```yaml
+cameras:
+  - id: "cam_01"
+    location: "Main Street Intersection"
+    source: "data/videos/cam1_main_street.mp4"
+    coordinates: [30.0444, 31.2357]
+
+  - id: "cam_02"
+    location: "Highway Exit 5"
+    source: "data/videos/cam2_highway.mp4"
+    coordinates: [30.0500, 31.2400]
+
+  - id: "cam_03"
+    location: "School Zone - Al Azhar"
+    source: "data/videos/cam3_school.mp4"
+    coordinates: [30.0455, 31.2380]
+
+  - id: "cam_04"
+    location: "Downtown Ring Road"
+    source: "data/videos/cam4_downtown.mp4"
+    coordinates: [30.0510, 31.2420]
+```
+
+**Quick Demo (same video × 4):**
+```bash
+copy data\videos\traffic.mp4 data\videos\cam1_main_street.mp4
+copy data\videos\traffic.mp4 data\videos\cam2_highway.mp4
+copy data\videos\traffic.mp4 data\videos\cam3_school.mp4
+copy data\videos\traffic.mp4 data\videos\cam4_downtown.mp4
+```
+
+**For real deployment:** Use RTSP camera URLs instead of files:
+```yaml
+source: "rtsp://admin:password@192.168.1.100:554/stream1"
+```
+
 ## 🧪 Testing
 
 ```bash
