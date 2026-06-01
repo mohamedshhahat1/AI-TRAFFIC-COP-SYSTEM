@@ -219,25 +219,24 @@ class VideoProcessor:
             is_violating = tid in violation_track_ids
             color = (0, 0, 255) if is_violating else (0, 255, 0)
             
-            cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 3)
             
             label = f"{cls} #{tid}"
-            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-            cv2.rectangle(annotated, (x1, y1 - th - 8), (x1 + tw + 4, y1), color, -1)
-            cv2.putText(annotated, label, (x1 + 2, y1 - 4),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+            cv2.rectangle(annotated, (x1, y1 - th - 10), (x1 + tw + 6, y1), color, -1)
+            cv2.putText(annotated, label, (x1 + 3, y1 - 5),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             
             speed_label = f"{speed:.0f} km/h"
-            cv2.putText(annotated, speed_label, (x1, y2 + 16),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+            cv2.putText(annotated, speed_label, (x1, y2 + 20),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
             
             if is_violating:
-                cv2.putText(annotated, "!! VIOLATION", (x1, y2 + 32),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+                cv2.putText(annotated, "!! VIOLATION", (x1, y2 + 42),
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         
-        # FALLBACK: If no tracks but detections exist, draw raw detections
-        # This ensures bounding boxes are ALWAYS visible when YOLO detects something
-        if not tracks and detections:
+        # FALLBACK: Only draw raw detections if NO tracks exist at all
+        if not tracks:
             raw_dets = detections
             if isinstance(raw_dets, dict):
                 raw_dets = raw_dets.get("objects", [])
@@ -254,13 +253,13 @@ class VideoProcessor:
                 else:
                     continue
                 
-                color = (0, 255, 255)  # Yellow for untracked detections
-                cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+                color = (0, 255, 255)
+                cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 3)
                 label = f"{cls_name} {conf:.0%}"
-                (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
-                cv2.rectangle(annotated, (x1, y1 - th - 6), (x1 + tw + 4, y1), color, -1)
-                cv2.putText(annotated, label, (x1 + 2, y1 - 3),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1)
+                (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+                cv2.rectangle(annotated, (x1, y1 - th - 8), (x1 + tw + 4, y1), color, -1)
+                cv2.putText(annotated, label, (x1 + 2, y1 - 4),
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
         
         # Draw violation alerts on top
         y_offset = 30
@@ -269,7 +268,7 @@ class VideoProcessor:
             v_tid = v.track_id if hasattr(v, 'track_id') else v.get('track_id', '?')
             text = f"!! {v_type}: Vehicle #{v_tid}"
             cv2.putText(annotated, text, (10, y_offset),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             y_offset += 25
         
         # Info bar at bottom
