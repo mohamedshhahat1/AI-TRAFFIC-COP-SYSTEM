@@ -51,10 +51,16 @@ class VideoProcessor:
         return {"status": "started", "source": source}
     
     def stop(self):
-        """Stop video processing."""
+        """Stop video processing and reset all stats."""
         self._running = False
         if self._thread:
             self._thread.join(timeout=3)
+        # Reset all stats to zero
+        self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
+        self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
+        self._confidence_sum = 0.0
+        self._confidence_count = 0
+        self._latest_frame = None
         logger.info("Video processing stopped")
         return {"status": "stopped"}
     
