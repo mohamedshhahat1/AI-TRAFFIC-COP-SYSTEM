@@ -280,7 +280,7 @@ async def list_cameras():
     from pathlib import Path
     
     cameras = []
-    config_path = Path(__file__).resolve().parents[3] / "configs" / "camera_config.yaml"
+    config_path = Path(__file__).resolve().parents[2] / "configs" / "camera_config.yaml"
     
     if config_path.exists():
         with open(config_path) as f:
