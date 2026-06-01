@@ -175,8 +175,7 @@ class VideoProcessor:
                 elif isinstance(r, dict):
                     self._send_update({"type": "accident_risk", "data": r})
             
-            # Throttle to ~10 FPS max for CPU
-            time.sleep(0.05)
+            # No throttle - pipeline speed is the natural limit on CPU
         
         cap.release()
         self._running = False
