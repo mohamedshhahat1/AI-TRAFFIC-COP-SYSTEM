@@ -1,0 +1,11 @@
+{
+  "plate": "UNKNOWN",
+  "plate_confidence": 0,
+  "owner": "Unknown",
+  "vehicle": "Unknown",
+  "color": "Unknown",
+  "registered": false,
+  "track_id": 20,
+  "timestamp": "2026-06-01 04:08:55",
+  "violation": {}
+}

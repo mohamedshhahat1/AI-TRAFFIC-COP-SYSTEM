@@ -1,0 +1,50 @@
+{
+  "ABC1234": {
+    "owner": "Ahmed Mohamed",
+    "vehicle": "Toyota Corolla 2022",
+    "color": "White",
+    "violations_history": 2
+  },
+  "XYZ5678": {
+    "owner": "Mohamed Ali",
+    "vehicle": "Hyundai Elantra 2021",
+    "color": "Silver",
+    "violations_history": 0
+  },
+  "DEF9012": {
+    "owner": "Sara Hassan",
+    "vehicle": "Kia Sportage 2023",
+    "color": "Black",
+    "violations_history": 1
+  },
+  "GHI3456": {
+    "owner": "Omar Khaled",
+    "vehicle": "Nissan Sunny 2020",
+    "color": "Red",
+    "violations_history": 5
+  },
+  "JKL7890": {
+    "owner": "Fatma Ibrahim",
+    "vehicle": "Toyota Yaris 2022",
+    "color": "Blue",
+    "violations_history": 0
+  },
+  "MNO2345": {
+    "owner": "Hassan Ahmed",
+    "vehicle": "Chevrolet Optra 2019",
+    "color": "Gray",
+    "violations_history": 3
+  },
+  "PQR6789": {
+    "owner": "Nour Saeed",
+    "vehicle": "Hyundai Accent 2021",
+    "color": "White",
+    "violations_history": 1
+  },
+  "STU0123": {
+    "owner": "Youssef Tarek",
+    "vehicle": "Suzuki Swift 2020",
+    "color": "Green",
+    "violations_history": 0
+  }
+}

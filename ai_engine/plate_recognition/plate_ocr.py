@@ -74,7 +74,7 @@ class PlateOCR:
         if self.backend in ("auto", "paddle"):
             try:
                 from paddleocr import PaddleOCR
-                self._engine = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
+                self._engine = PaddleOCR(use_angle_cls=True, lang='ar')  # Arabic + numbers
                 self.backend = "paddle"
                 return
             except ImportError:
@@ -83,7 +83,7 @@ class PlateOCR:
         if self.backend in ("auto", "easy"):
             try:
                 import easyocr
-                self._engine = easyocr.Reader(['en'], gpu=False, verbose=False)
+                self._engine = easyocr.Reader(['ar', 'en'], gpu=False, verbose=False)  # Arabic + English
                 self.backend = "easy"
                 return
             except ImportError:
