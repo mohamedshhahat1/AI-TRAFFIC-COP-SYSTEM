@@ -107,3 +107,4 @@ firebase-credentials.json
 *.pyc
 .mypy_cache/
 .ruff_cache/
+data/evidence/
