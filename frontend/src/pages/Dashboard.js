@@ -9,6 +9,7 @@ import DetectionStats from '../components/DetectionStats';
 import AccidentRiskPanel from '../components/AccidentRiskPanel';
 import TrafficHeatmap from '../components/TrafficHeatmap';
 import DetectedPlates from '../components/DetectedPlates';
+import MultiCameraGrid from '../components/MultiCameraGrid';
 import SystemArchLive from '../components/SystemArchLive';
 
 function Dashboard() {
@@ -95,6 +96,8 @@ function Dashboard() {
       <DetectedPlates />
       
       <TrafficHeatmap />
+      
+      <MultiCameraGrid />
       
       <ViolationTable violations={violations} title="Recent Violations" />
     </div>
