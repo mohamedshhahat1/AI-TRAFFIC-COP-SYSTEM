@@ -51,7 +51,7 @@ class AIPipeline:
         self.log.info("Loading detection model...")
         self.detector = YOLODetector(
             model_name=cfg.get("detection", {}).get("model", cfg.get("model", "yolov8n")),
-            confidence=cfg.get("detection", {}).get("confidence", cfg.get("confidence", 0.5)),
+            confidence=cfg.get("detection", {}).get("confidence", cfg.get("confidence", 0.25)),
             device=cfg.get("detection", {}).get("device", cfg.get("device", "auto")),
         )
         

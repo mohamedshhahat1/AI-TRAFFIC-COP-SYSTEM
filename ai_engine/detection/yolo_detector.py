@@ -51,7 +51,7 @@ class YOLODetector:
     def __init__(
         self,
         model_name: str = "yolov8n",
-        confidence: float = 0.5,
+        confidence: float = 0.25,
         iou_threshold: float = 0.45,
         device: str = "auto",
         img_size: int = 640,
