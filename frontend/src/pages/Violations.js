@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ViolationTable from '../components/ViolationTable';
+import PlateViolationTable from '../components/PlateViolationTable';
 import { fetchViolations, fetchEventHistory } from '../services/api';
 
 function Violations() {
@@ -40,6 +41,8 @@ function Violations() {
       </div>
       
       <ViolationTable violations={violations} title="All Violations" />
+      
+      <PlateViolationTable />
       
       {/* Event History */}
       <div className="panel">
