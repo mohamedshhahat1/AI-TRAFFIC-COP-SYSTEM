@@ -685,6 +685,48 @@ python -m uvicorn backend.app.main:app --port 8000
 
 ---
 
+---
+
+## 📷 Multi-Camera Network Feature
+
+> **Branch:** `feature/multi-camera`
+
+### What It Does
+- **2×2 camera grid** on dashboard showing all cameras simultaneously
+- **Click to expand** any camera to see live MJPEG stream
+- **Per-camera status**: Active (green) / Standby (yellow) / Offline (red)
+- **Per-camera stats**: vehicles tracked, congestion level, FPS
+- **Network summary**: total cameras, active count, total vehicles across all
+
+### Architecture
+```
+camera_config.yaml → /api/cameras → MultiCameraGrid component
+                                         ↓
+                              Click tile → /api/camera/feed (MJPEG)
+```
+
+### Components
+| File | Purpose |
+|------|---------|
+| `frontend/src/components/MultiCameraGrid.js` | 2×2 grid with camera tiles |
+| `backend/app/main.py` → `/api/cameras` | Returns all camera status |
+| `configs/camera_config.yaml` | Camera network configuration |
+
+### Dashboard View
+```
+┌─────────────────────┬─────────────────────┐
+│ cam_01 ● ACTIVE     │ cam_02 ● STANDBY    │
+│ Main Street         │ Highway Exit 5      │
+│ [LIVE VIDEO FEED]   │ 📵 OFFLINE          │
+│ 5 vehicles | 6 FPS  │                     │
+├─────────────────────┼─────────────────────┤
+│ cam_03 ● STANDBY    │ cam_04 ● STANDBY    │
+│ School Zone         │ Downtown Ring Road  │
+│ 📵 OFFLINE          │ 📵 OFFLINE          │
+└─────────────────────┴─────────────────────┘
+  1 Active  |  0 Offline  |  5 Total Vehicles
+```
+
 ## 📷 Multi-Camera Setup
 
 ### Add Videos to All 4 Cameras
