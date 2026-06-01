@@ -26,6 +26,7 @@ import uvicorn
 
 from .config import settings
 from .routes import violations, vehicles, analytics
+from .routes import plates
 from .video_processor import VideoProcessor
 
 # Add project root to path for ai_engine imports
@@ -64,6 +65,7 @@ app.add_middleware(
 app.include_router(violations.router, prefix="/api/violations", tags=["Violations"])
 app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
+app.include_router(plates.router, prefix="/api/plates", tags=["License Plates"])
 
 # WebSocket connections
 ws_connections: list = []
