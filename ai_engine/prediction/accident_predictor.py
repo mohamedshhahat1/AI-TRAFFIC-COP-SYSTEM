@@ -39,9 +39,9 @@ class AccidentPredictor:
     
     def __init__(
         self,
-        min_ttc_warning: float = 2.0,     # seconds - only warn if collision < 2s     # seconds
-        min_ttc_critical: float = 0.8,     # seconds - imminent only if < 0.8s     # seconds
-        proximity_threshold: float = 50,   # pixels - vehicles must be very close   # pixels
+        min_ttc_warning: float = 1.0,     # seconds - only warn if collision < 1s     # seconds
+        min_ttc_critical: float = 0.3,     # seconds - imminent only if < 0.3s     # seconds
+        proximity_threshold: float = 30,   # pixels - only touching/overlapping vehicles   # pixels
         prediction_horizon: int = 30,       # frames ahead
     ):
         self.min_ttc_warning = min_ttc_warning
@@ -83,8 +83,11 @@ class AccidentPredictor:
             if risk:
                 risks.append(risk)
         
+        # Limit to top 3 most critical risks per frame (avoid spam)
+        risks.sort(key=lambda r: r.risk_score, reverse=True)
+        risks = risks[:3]
+        
         self.risk_history.extend(risks)
-        # Prune old entries (keep last 500)
         if len(self.risk_history) > 500:
             self.risk_history = self.risk_history[-500:]
         return risks
@@ -120,7 +123,7 @@ class AccidentPredictor:
         # Risk scoring
         risk_score = self._compute_risk_score(dist, future_dist, ttc, track_a, track_b)
         
-        if risk_score < 0.6:  # Higher threshold to reduce false positives
+        if risk_score < 0.8:  # Very high threshold - only real danger
             return None
         
         # Determine risk level
