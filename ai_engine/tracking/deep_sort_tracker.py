@@ -31,8 +31,8 @@ class DeepSortTracker:
         self,
         max_age: int = 30,
         min_hits: int = 3,
-        iou_threshold: float = 0.3,
-        max_cosine_distance: float = 0.4,
+        iou_threshold: float = 0.2,  # Lower = more lenient matching (less ID switches)
+        max_cosine_distance: float = 0.6,  # Higher = more lenient appearance matching
         nn_budget: int = 100,
         embedder: str = "mobilenet",
     ):

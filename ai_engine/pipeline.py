@@ -57,7 +57,7 @@ class AIPipeline:
         
         # Layer 2: Tracking
         self.tracker = DeepSortTracker(
-            max_age=cfg.get("tracking", {}).get("max_age", cfg.get("max_age", 30)),
+            max_age=cfg.get("tracking", {}).get("max_age", cfg.get("max_age", 70)),
             embedder=cfg.get("tracking", {}).get("embedder", cfg.get("embedder", "mobilenet")),
         )
         
