@@ -124,10 +124,20 @@ class VideoProcessor:
                     self._confidence_sum += conf
                     self._confidence_count += 1
 
+            # Calculate average speed from tracked vehicles
+            raw_tracks = results.get("tracks", [])
+            speeds = []
+            for t in raw_tracks:
+                spd = t.current_speed if hasattr(t, 'current_speed') else 0
+                if spd > 0:
+                    speeds.append(spd)
+            avg_speed = round(sum(speeds) / len(speeds), 1) if speeds else 0
+            
             self.stats = {
                 "fps": round(current_fps, 1),
                 "objects": detections,
                 "tracks": tracks_val,
+                "avg_speed": avg_speed,
                 "frame": results.get("frame_number", 0) or stats.get("frame_number", 0),
                 "violations": violations_val,
                 "congestion": stats.get("congestion_level", "free") or results.get("congestion", {}).get("level", "free"),
