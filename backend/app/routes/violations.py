@@ -39,6 +39,7 @@ async def today_summary():
     return {"total": len(today), "by_type": by_type}
 
 
+@router.get("")
 @router.get("/")
 async def list_violations(
     type: Optional[str] = None,

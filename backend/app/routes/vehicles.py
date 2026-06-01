@@ -8,6 +8,7 @@ router = APIRouter()
 _vehicles = []
 
 
+@router.get("")
 @router.get("/")
 async def list_vehicles(
     vehicle_class: Optional[str] = None,

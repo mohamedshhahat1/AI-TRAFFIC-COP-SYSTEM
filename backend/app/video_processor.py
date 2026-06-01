@@ -103,11 +103,12 @@ class VideoProcessor:
             else:
                 current_fps = self.stats["fps"]
             
-            # Extract stats - handle both pipeline and formatted response
-            stats = results.get("stats", results)
-            detections = stats.get("detected_objects", 0) or results.get("detections", {}).get("count", 0)
-            tracks_val = stats.get("active_tracks", 0) or results.get("tracking", {}).get("active_vehicles", 0)
-            violations_val = stats.get("new_violations", 0) or results.get("violations", {}).get("new_count", 0)
+            # Extract stats from pipeline results
+            stats = results.get("stats", {})
+            detections = stats.get("detected_objects", 0)
+            tracks_val = stats.get("active_tracks", 0)
+            violations_list = results.get("violations", [])
+            violations_val = len(violations_list) if isinstance(violations_list, list) else 0
             
             # Count detections by class
             raw_dets = results.get("detections", [])
