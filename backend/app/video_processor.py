@@ -87,8 +87,11 @@ class VideoProcessor:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 continue
             
-            # Process frame through AI Gateway
-            results = self.gateway.process_frame(frame)
+            # Process frame through AI Pipeline directly (raw objects for annotation)
+            if self.gateway.inference._pipeline:
+                results = self.gateway.inference._pipeline.process_frame(frame)
+            else:
+                results = self.gateway.process_frame(frame)
             fps_counter += 1
             
             # Calculate FPS
@@ -198,10 +201,20 @@ class VideoProcessor:
         
         # Draw tracked vehicles (with ID + speed)
         for track in tracks:
-            x1, y1, x2, y2 = track.bbox
-            speed = track.current_speed
-            tid = track.track_id
-            cls = track.class_name
+            # Handle both raw Track objects and dicts
+            if hasattr(track, 'bbox'):
+                x1, y1, x2, y2 = track.bbox
+                speed = track.current_speed
+                tid = track.track_id
+                cls = track.class_name
+            elif isinstance(track, dict):
+                bbox = track.get('bbox', (0,0,0,0))
+                x1, y1, x2, y2 = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+                speed = track.get('speed', 0)
+                tid = track.get('track_id', '?')
+                cls = track.get('class_name', 'vehicle')
+            else:
+                continue
             
             is_violating = tid in violation_track_ids
             color = (0, 0, 255) if is_violating else (0, 255, 0)
@@ -233,6 +246,11 @@ class VideoProcessor:
                     x1, y1, x2, y2 = det.bbox
                     cls_name = det.class_name
                     conf = det.confidence
+                elif isinstance(det, dict):
+                    bbox = det.get('bbox', (0,0,0,0))
+                    x1, y1, x2, y2 = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+                    cls_name = det.get('class', det.get('class_name', ''))
+                    conf = det.get('confidence', 0)
                 else:
                     continue
                 
