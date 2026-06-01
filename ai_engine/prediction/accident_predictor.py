@@ -39,9 +39,9 @@ class AccidentPredictor:
     
     def __init__(
         self,
-        min_ttc_warning: float = 3.0,     # seconds
-        min_ttc_critical: float = 1.5,     # seconds
-        proximity_threshold: float = 100,   # pixels
+        min_ttc_warning: float = 2.0,     # seconds - only warn if collision < 2s     # seconds
+        min_ttc_critical: float = 0.8,     # seconds - imminent only if < 0.8s     # seconds
+        proximity_threshold: float = 50,   # pixels - vehicles must be very close   # pixels
         prediction_horizon: int = 30,       # frames ahead
     ):
         self.min_ttc_warning = min_ttc_warning
@@ -91,10 +91,14 @@ class AccidentPredictor:
     
     def _assess_pair(self, track_a, track_b) -> Optional[AccidentRisk]:
         """Assess collision risk between two vehicles."""
+        # Need enough history for reliable prediction
+        if len(track_a.positions) < 10 or len(track_b.positions) < 10:
+            return None
+        
         # Current distance
         dist = self._distance(track_a.center, track_b.center)
         
-        if dist > self.proximity_threshold * 3:
+        if dist > self.proximity_threshold * 2:  # Must be within 100px
             return None  # Too far apart
         
         # Predict future positions
@@ -116,7 +120,7 @@ class AccidentPredictor:
         # Risk scoring
         risk_score = self._compute_risk_score(dist, future_dist, ttc, track_a, track_b)
         
-        if risk_score < 0.3:
+        if risk_score < 0.6:  # Higher threshold to reduce false positives
             return None
         
         # Determine risk level
