@@ -32,13 +32,7 @@ class VideoProcessor:
         self._source = None
         self._loop = None
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
-        if PlatePipeline:
-            self._plate_pipeline = PlatePipeline()
-            # Force simulated OCR for demo (works without visible plates)
-            self._plate_pipeline.ocr.backend = "none"
-            self._plate_pipeline.ocr._engine = None
-        else:
-            self._plate_pipeline = None
+        self._plate_pipeline = PlatePipeline() if PlatePipeline else None
         self._last_plates = []
         self.camera_info = {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
         self._latest_frame = None  # Latest annotated frame (JPEG bytes)
@@ -70,13 +64,7 @@ class VideoProcessor:
             self._thread.join(timeout=3)
         # Reset all stats to zero
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
-        if PlatePipeline:
-            self._plate_pipeline = PlatePipeline()
-            # Force simulated OCR for demo (works without visible plates)
-            self._plate_pipeline.ocr.backend = "none"
-            self._plate_pipeline.ocr._engine = None
-        else:
-            self._plate_pipeline = None
+        self._plate_pipeline = PlatePipeline() if PlatePipeline else None
         self._last_plates = []
         self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
         self._confidence_sum = 0.0
