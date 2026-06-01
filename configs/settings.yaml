@@ -5,7 +5,7 @@ camera:
   - 720
   source: data/videos/sample.mp4
 detection:
-  confidence: 0.25
+  confidence: 0.35
   device: auto
   model: yolov8n
 speed:

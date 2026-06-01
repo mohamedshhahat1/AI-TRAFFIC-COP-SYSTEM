@@ -51,8 +51,8 @@ class YOLODetector:
     def __init__(
         self,
         model_name: str = "yolov8n",
-        confidence: float = 0.25,
-        iou_threshold: float = 0.45,
+        confidence: float = 0.35,  # Balance between detection rate and false positives
+        iou_threshold: float = 0.3,  # Lower = merge overlapping boxes more aggressively
         device: str = "auto",
         img_size: int = 640,
     ):

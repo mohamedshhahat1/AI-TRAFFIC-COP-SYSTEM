@@ -30,7 +30,7 @@ class DeepSortTracker:
     def __init__(
         self,
         max_age: int = 30,
-        min_hits: int = 3,
+        min_hits: int = 5,  # Need 5 consecutive detections before confirming a track
         iou_threshold: float = 0.2,  # Lower = more lenient matching (less ID switches)
         max_cosine_distance: float = 0.6,  # Higher = more lenient appearance matching
         nn_budget: int = 100,
