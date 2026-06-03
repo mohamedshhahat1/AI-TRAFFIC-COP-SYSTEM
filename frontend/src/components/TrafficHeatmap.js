@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../services/api';
 
 function TrafficHeatmap() {
   const [zones, setZones] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadZones = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/analytics/heatmap');
+        const res = await fetch(`${API_BASE}/analytics/heatmap`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.zones && data.zones.length > 0) {
           setZones(data.zones);
+          setError(null);
         }
-      } catch (e) {}
+      } catch (e) {
+        setError('Unable to load zone data');
+      }
     };
     loadZones();
     const interval = setInterval(loadZones, 5000);
@@ -52,6 +58,7 @@ function TrafficHeatmap() {
         <h2>🗺️ Top Congested Zones</h2>
         <span className="count-badge">{displayZones.length} zones</span>
       </div>
+      {error && <p style={{color: '#ea4335', fontSize: '0.8em', padding: '0 16px'}}>{error}</p>}
       <div className="heatmap-content">
         {displayZones.map((zone, i) => (
           <div key={i} className="heatmap-row">
@@ -61,8 +68,8 @@ function TrafficHeatmap() {
                 {getStatusIcon(zone.status)} {zone.name}
               </div>
               <div className="heatmap-bar-container">
-                <div 
-                  className="heatmap-bar" 
+                <div
+                  className="heatmap-bar"
                   style={{
                     width: `${zone.congestion}%`,
                     background: `linear-gradient(90deg, ${getColor(zone.congestion)}88, ${getColor(zone.congestion)})`,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchCameraStats, fetchEventMetrics, fetchHealth, fetchRequestCount } from '../services/api';
 
 function SystemArchLive() {
   const [data, setData] = useState({
@@ -14,17 +15,12 @@ function SystemArchLive() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsRes, eventsRes, healthRes, reqRes] = await Promise.all([
-          fetch('http://localhost:8000/api/camera/stats'),
-          fetch('http://localhost:8000/api/events/metrics'),
-          fetch('http://localhost:8000/api/health'),
-          fetch('http://localhost:8000/api/stats/requests'),
+        const [stats, events, health, requests] = await Promise.all([
+          fetchCameraStats(),
+          fetchEventMetrics(),
+          fetchHealth(),
+          fetchRequestCount(),
         ]);
-
-        const stats = await statsRes.json();
-        const events = await eventsRes.json();
-        const health = await healthRes.json();
-        const requests = await reqRes.json();
 
         const inference = health.ai_gateway?.inference || {};
 
@@ -37,7 +33,9 @@ function SystemArchLive() {
           totalDetections: inference.total_inferences || 0,
           totalViolations: events.total_handled || 0,
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error('Failed to load system arch data:', e);
+      }
     };
 
     load();

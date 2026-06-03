@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { startCamera, stopCamera } from '../services/api';
-
-const API_BASE = 'http://localhost:8000/api';
+import { startCamera, stopCamera, fetchCameraStats, fetchCameraInfo, API_BASE } from '../services/api';
 
 function LiveCameraFeed() {
   const [isLive, setIsLive] = useState(false);
@@ -14,14 +12,11 @@ function LiveCameraFeed() {
 
   useEffect(() => {
     if (isLive) {
-      fetch(`${API_BASE}/camera/info`).then(r => r.json()).then(setCameraInfo).catch(() => {});
-      
+      fetchCameraInfo().then(setCameraInfo);
+
       pollRef.current = setInterval(async () => {
-        try {
-          const res = await fetch(`${API_BASE}/camera/stats`);
-          const data = await res.json();
-          setStats(data);
-        } catch (e) {}
+        const data = await fetchCameraStats();
+        setStats(data);
       }, 500);
     } else {
       if (pollRef.current) clearInterval(pollRef.current);
@@ -45,6 +40,8 @@ function LiveCameraFeed() {
           setIsLive(true);
           setStatus(`🟢 Processing ${file.name}`);
         }
+      } else {
+        setStatus(`❌ ${data.message || 'Upload failed'}`);
       }
     } catch (err) {
       setStatus(`❌ Upload error: ${err.message}`);
@@ -78,9 +75,9 @@ function LiveCameraFeed() {
         <div className="camera-controls">
           <button className="btn btn-success" onClick={handleStart} disabled={isLive}>▶ Start</button>
           <button className="btn btn-danger" onClick={handleStop} disabled={!isLive}>⬛ Stop</button>
-          <button 
-            className="btn" 
-            onClick={() => fileInputRef.current.click()} 
+          <button
+            className="btn"
+            onClick={() => fileInputRef.current.click()}
             disabled={uploading}
             style={{background: '#4285f4', color: '#fff'}}
           >
@@ -99,7 +96,7 @@ function LiveCameraFeed() {
         {isLive ? (
           <div className="feed-active">
             {/* MJPEG Video Stream with bounding boxes */}
-            <img 
+            <img
               src={`${API_BASE}/camera/feed`}
               alt="AI Traffic Detection"
               className="video-stream"
