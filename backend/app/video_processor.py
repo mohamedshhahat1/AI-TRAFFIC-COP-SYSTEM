@@ -173,6 +173,22 @@ class VideoProcessor:
             # Annotate frame with bounding boxes, IDs, speed, violations
             annotated = self._annotate_frame(frame, results)
 
+            # Feed frame to RL Signal Control (if active)
+            try:
+                import sys
+                if 'rl_signal_control.integration.api_routes' in sys.modules:
+                    from rl_signal_control.integration.api_routes import get_live_env
+                    rl_live = get_live_env()
+                    if rl_live and rl_live._is_running and rl_live._detector:
+                        rl_result = rl_live.process_frame(frame)
+                        if rl_result.get("action_taken"):
+                            self._send_update({
+                                "type": "rl_decision",
+                                "data": rl_result
+                            })
+            except Exception:
+                pass  # RL module not available or not started
+
             # Encode as JPEG for streaming
             _, jpeg = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 70])
             self._latest_frame = jpeg.tobytes()

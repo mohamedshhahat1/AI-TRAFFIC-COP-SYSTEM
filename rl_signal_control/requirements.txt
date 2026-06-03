@@ -1,0 +1,30 @@
+# RL Traffic Signal Control Dependencies
+
+# Simulation
+traci>=1.18.0
+sumolib>=1.18.0
+
+# Reinforcement Learning
+gymnasium>=0.29.0
+stable-baselines3>=2.2.0
+sb3-contrib>=2.2.0
+
+# Deep Learning
+torch>=2.1.0
+numpy>=1.24.0
+
+# Visualization & Monitoring
+matplotlib>=3.7.0
+seaborn>=0.12.0
+tensorboard>=2.15.0
+wandb>=0.16.0
+
+# Dashboard
+fastapi>=0.104.0
+uvicorn>=0.24.0
+websockets>=12.0
+
+# Utils
+pyyaml>=6.0
+tqdm>=4.66.0
+pandas>=2.0.0

@@ -30,7 +30,7 @@ from .video_processor import VideoProcessor
 from .middleware.rate_limit import RateLimitMiddleware
 from .middleware.auth import api_key_auth
 
-# Add project root to path for ai_engine imports
+# Add project root to path for ai_engine and rl_signal_control imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 # Create app
@@ -69,6 +69,14 @@ app.add_middleware(
 app.include_router(violations.router, prefix="/api/violations", tags=["Violations"])
 app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
+
+# RL Signal Control Routes
+try:
+    from rl_signal_control.integration.api_routes import rl_router
+    app.include_router(rl_router, prefix="/api/rl", tags=["RL Signal Control"])
+    logger.info("✅ RL Signal Control routes registered at /api/rl")
+except ImportError:
+    logger.info("ℹ️ RL Signal Control module not available (optional)")
 
 # WebSocket connections
 ws_connections: list = []
@@ -136,6 +144,16 @@ async def startup():
     except Exception as e:
         logger.error(f"❌ AI Gateway init failed: {e}")
         logger.info("Running in API-only mode (AI Gateway disabled)")
+
+    # Initialize RL Signal Control integration
+    try:
+        from rl_signal_control.integration.plug_into_backend import setup_rl_integration
+        setup_rl_integration(app, ai_gateway, broadcast)
+        logger.info("✅ RL Signal Control integrated")
+    except ImportError:
+        logger.info("ℹ️ RL Signal Control not available (install rl_signal_control)")
+    except Exception as e:
+        logger.warning(f"⚠️ RL integration failed: {e}")
 
     logger.info("✅ API server ready")
 
