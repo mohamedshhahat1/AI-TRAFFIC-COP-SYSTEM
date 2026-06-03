@@ -211,6 +211,19 @@ async def start_camera(source: str = "data/videos/traffic.mp4", _user: str = Dep
         return {"status": "error", "message": "AI Gateway not initialized"}
     if not video_processor:
         return {"status": "error", "message": "Video processor not available"}
+
+    # Validate source: only allow local files in data/ or RTSP streams
+    import re
+    if source.startswith("rtsp://") or source.startswith("http://") or source.startswith("https://"):
+        pass  # Allow streaming URLs
+    else:
+        # Local file: must be within data/ directory, no path traversal
+        from pathlib import Path
+        safe_path = Path(source).resolve()
+        allowed_dir = Path("data").resolve()
+        if ".." in source or not str(safe_path).startswith(str(allowed_dir)):
+            return {"status": "error", "message": "Invalid source path. Files must be in data/ directory."}
+
     return video_processor.start(source)
 
 
