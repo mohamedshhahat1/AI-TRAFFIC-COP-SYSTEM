@@ -80,9 +80,14 @@ video_processor = None
 
 @app.on_event("startup")
 async def startup():
-    """Initialize AI Gateway and subscribe to Event Bus events."""
+    """Initialize database and AI Gateway, subscribe to Event Bus events."""
     global ai_gateway, video_processor
     logger.info("🚀 Starting AI Traffic Cop API...")
+
+    # Initialize database
+    from .services.db_service import init_db
+    await init_db()
+    logger.info("✅ Database initialized")
 
     # Initialize AI Gateway
     try:
