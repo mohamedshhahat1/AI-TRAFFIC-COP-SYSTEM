@@ -253,18 +253,43 @@ async def upload_video(file: UploadFile = File(...)):
     """Upload a traffic video for AI processing."""
     from pathlib import Path
     import shutil
-    
+    import re
+
+    # Validate file type
+    ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
+    MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
+
+    if not file.filename:
+        return {"status": "error", "message": "No filename provided"}
+
+    # Sanitize filename - remove path separators and dangerous characters
+    safe_filename = re.sub(r'[^\w\-.]', '_', Path(file.filename).name)
+    ext = Path(safe_filename).suffix.lower()
+
+    if ext not in ALLOWED_EXTENSIONS:
+        return {"status": "error", "message": f"Invalid file type '{ext}'. Allowed: {ALLOWED_EXTENSIONS}"}
+
     # Save uploaded file
     upload_dir = Path("data/videos")
     upload_dir.mkdir(parents=True, exist_ok=True)
-    
-    file_path = upload_dir / file.filename
+
+    file_path = upload_dir / safe_filename
+
+    # Ensure the resolved path is within the upload directory
+    if not str(file_path.resolve()).startswith(str(upload_dir.resolve())):
+        return {"status": "error", "message": "Invalid filename"}
+
+    # Check file size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        return {"status": "error", "message": f"File too large. Max size: {MAX_FILE_SIZE // (1024*1024)}MB"}
+
     with open(file_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
-    
+        f.write(content)
+
     return {
         "status": "uploaded",
-        "filename": file.filename,
+        "filename": safe_filename,
         "path": str(file_path),
         "message": f"Video uploaded. Start processing with POST /api/camera/start?source={file_path}"
     }
