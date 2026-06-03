@@ -305,7 +305,7 @@ async def upload_video(file: UploadFile = File(...), _user: str = Depends(api_ke
     }
 
 @app.websocket("/ws/live")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket, token: str = None):
     """
     Live event stream via WebSocket.
     Dashboard/mobile connects here to receive real-time:
@@ -313,7 +313,16 @@ async def websocket_endpoint(websocket: WebSocket):
     - Tracking updates
     - Congestion changes
     - Accident risk warnings
+
+    Optional token parameter for authentication when API_KEY is set.
+    Connect with: ws://host/ws/live?token=YOUR_API_KEY
     """
+    # Validate token if API_KEY is configured
+    if settings.API_KEY:
+        if not token or token != settings.API_KEY:
+            await websocket.close(code=4001, reason="Invalid or missing token")
+            return
+
     await websocket.accept()
     ws_connections.append(websocket)
     logger.info(f"🔌 WS connected ({len(ws_connections)} active)")
