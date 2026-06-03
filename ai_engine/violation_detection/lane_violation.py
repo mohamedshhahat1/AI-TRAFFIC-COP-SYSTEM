@@ -26,12 +26,42 @@ class LaneViolation:
 
 
 class LaneViolationDetector:
-    """Detects lane-related violations."""
-    
-    def __init__(self, lane_boundaries: List[int] = None):
-        self.lane_boundaries = lane_boundaries or [200, 400, 600, 800]
+    """
+    Detects lane-related violations.
+
+    lane_boundaries should be configured per camera via camera_config.yaml
+    based on actual lane positions in the camera's field of view.
+    """
+
+    def __init__(self, lane_boundaries: List[int] = None, frame_width: int = 1280):
+        """
+        Initialize lane violation detector.
+
+        Args:
+            lane_boundaries: List of x-pixel positions for lane dividers.
+                            If None, auto-generates evenly spaced boundaries
+                            based on frame_width (suitable for demo only).
+            frame_width: Video frame width for auto-boundary calculation.
+        """
+        if lane_boundaries:
+            self.lane_boundaries = lane_boundaries
+        else:
+            # Auto-generate: divide frame into 4 lanes
+            step = frame_width // 5
+            self.lane_boundaries = [step * i for i in range(1, 5)]
+            logger.info(f"Lane boundaries auto-generated: {self.lane_boundaries} "
+                       f"(configure per-camera for production)")
+
         self._cooldowns = {}
         self._cooldown_period = 12.0
+
+    @classmethod
+    def from_config(cls, camera_config: dict) -> "LaneViolationDetector":
+        """Create detector from camera configuration."""
+        return cls(
+            lane_boundaries=camera_config.get("lane_boundaries"),
+            frame_width=camera_config.get("frame_width", 1280),
+        )
     
     def check(self, track) -> Optional[LaneViolation]:
         """Check for illegal lane changes."""
