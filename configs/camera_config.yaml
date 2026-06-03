@@ -1,16 +1,46 @@
 # Camera Configuration
+# Each camera can have its own calibration settings
+
+defaults:
+  pixel_to_meter: 0.05       # Default pixel-to-meter ratio (requires calibration per camera)
+  fps: 30                    # Default FPS (overridden by video metadata when available)
+  speed_limit: 60.0          # Default speed limit in km/h
+  smoothing_window: 5        # Speed smoothing window (frames)
+  min_track_frames: 10       # Minimum frames before speed is calculated
+
 cameras:
   - id: "cam_01"
     location: "Main Street Intersection"
     source: "rtsp://192.168.1.100:554/stream1"
     coordinates: [30.0444, 31.2357]
-    
+    # Per-camera calibration (override defaults)
+    pixel_to_meter: 0.048
+    speed_limit: 50.0
+    fps: 25
+
   - id: "cam_02"
     location: "Highway Exit 5"
     source: "rtsp://192.168.1.101:554/stream1"
     coordinates: [30.0500, 31.2400]
+    pixel_to_meter: 0.062
+    speed_limit: 80.0
+    fps: 30
 
   - id: "cam_03"
     location: "School Zone - Al Azhar"
     source: "rtsp://192.168.1.102:554/stream1"
     coordinates: [30.0455, 31.2380]
+    pixel_to_meter: 0.04
+    speed_limit: 30.0
+    fps: 25
+
+# Calibration instructions:
+# To calibrate pixel_to_meter for a camera:
+# 1. Identify a known distance in the camera's field of view (e.g., lane width = 3.5m)
+# 2. Measure the same distance in pixels in the video frame
+# 3. pixel_to_meter = real_distance_meters / pixel_distance
+# Example: Lane is 3.5m wide and appears as 70px → pixel_to_meter = 3.5/70 = 0.05
+#
+# For more accurate calibration, use perspective transform:
+# Provide 4 points in pixel coordinates and their real-world coordinates
+# The SpeedCalculator.calibrate() method handles this automatically.

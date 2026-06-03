@@ -39,21 +39,28 @@ class AccidentPredictor:
     
     def __init__(
         self,
-        min_ttc_warning: float = 1.0,     # seconds - only warn if collision < 1s     # seconds
-        min_ttc_critical: float = 0.3,     # seconds - imminent only if < 0.3s     # seconds
-        proximity_threshold: float = 30,   # pixels - only touching/overlapping vehicles   # pixels
-        prediction_horizon: int = 30,       # frames ahead
+        min_ttc_warning: float = 1.0,     # seconds - only warn if collision < 1s
+        min_ttc_critical: float = 0.3,     # seconds - imminent only if < 0.3s
+        proximity_threshold: float = 30,   # pixels - only touching/overlapping vehicles
+        prediction_horizon: int = 30,      # frames ahead
+        fps: int = 30,                     # camera FPS for frame-to-second conversion
     ):
         self.min_ttc_warning = min_ttc_warning
         self.min_ttc_critical = min_ttc_critical
         self.proximity_threshold = proximity_threshold
         self.prediction_horizon = prediction_horizon
+        self.fps = fps
         
         self.risk_history: List[AccidentRisk] = []  # Pruned periodically
         self._alerts_sent: Dict[str, float] = {}
         self._prev_speeds: Dict[int, float] = {}  # track_id -> previous speed
         
         logger.info("AccidentPredictor initialized")
+
+    def update_fps(self, fps: int):
+        """Update FPS for accurate time-to-collision calculation."""
+        if fps > 0:
+            self.fps = fps
     
     def analyze(self, tracks: list) -> List[AccidentRisk]:
         """
@@ -239,8 +246,8 @@ class AccidentPredictor:
         if t_min < 0:
             return None  # Already diverging
         
-        # t_min is in frame units; convert to seconds (assuming ~30fps)
-        ttc_seconds = t_min / 30.0
+        # t_min is in frame units; convert to seconds using actual FPS
+        ttc_seconds = t_min / self.fps
         
         return ttc_seconds
     

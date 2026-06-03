@@ -18,8 +18,10 @@ class SpeedCalculator:
     """
     Calculates real-world vehicle speed from tracked positions.
     Converts pixel movement to km/h using calibration factors.
+
+    pixel_to_meter and fps should be configured per camera via camera_config.yaml.
     """
-    
+
     def __init__(
         self,
         pixel_to_meter: float = 0.05,
@@ -33,11 +35,36 @@ class SpeedCalculator:
         self.speed_limit = speed_limit
         self.smoothing_window = smoothing_window
         self.min_track_frames = min_track_frames
-        
+
         self._speed_history: Dict[int, deque] = {}
         self._perspective_matrix: Optional[np.ndarray] = None
-        
-        logger.info(f"SpeedCalculator | limit={speed_limit}km/h | ratio={pixel_to_meter}")
+        self._is_calibrated = False
+
+        logger.info(f"SpeedCalculator | limit={speed_limit}km/h | ratio={pixel_to_meter} | fps={fps}")
+
+    @classmethod
+    def from_config(cls, camera_config: dict, defaults: dict = None) -> "SpeedCalculator":
+        """
+        Create a SpeedCalculator from camera configuration.
+
+        Args:
+            camera_config: Per-camera config with pixel_to_meter, fps, speed_limit
+            defaults: Fallback values if not specified in camera config
+        """
+        defaults = defaults or {}
+        return cls(
+            pixel_to_meter=camera_config.get("pixel_to_meter", defaults.get("pixel_to_meter", 0.05)),
+            fps=camera_config.get("fps", defaults.get("fps", 30)),
+            speed_limit=camera_config.get("speed_limit", defaults.get("speed_limit", 60.0)),
+            smoothing_window=camera_config.get("smoothing_window", defaults.get("smoothing_window", 5)),
+            min_track_frames=camera_config.get("min_track_frames", defaults.get("min_track_frames", 10)),
+        )
+
+    def update_fps(self, fps: int):
+        """Update FPS (e.g., from actual video metadata)."""
+        if fps > 0:
+            self.fps = fps
+            logger.info(f"SpeedCalculator FPS updated to {fps}")
     
     def calculate(self, track) -> float:
         """
@@ -114,7 +141,13 @@ class SpeedCalculator:
         src = np.array(pixel_pts, dtype=np.float32)
         dst = np.array(real_pts, dtype=np.float32)
         self._perspective_matrix = cv2.getPerspectiveTransform(src, dst)
+        self._is_calibrated = True
         logger.info("Speed calculator calibrated with perspective transform")
+
+    @property
+    def is_calibrated(self) -> bool:
+        """Whether camera calibration has been applied."""
+        return self._is_calibrated
     
     def is_overspeeding(self, track) -> bool:
         """Check if vehicle exceeds speed limit."""
