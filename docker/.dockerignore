@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.venv
+venv
+env
+
+# Node
+frontend/node_modules
+frontend/build
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# Data (large files)
+data/videos/*.mp4
+data/videos/*.avi
+data/images/
+models/*.pt
+models/*.onnx
+
+# Logs
+logs/
+*.log
+
+# Docs
+docs/
+
+# Mobile app
+mobile_app/
+
+# Tests
+tests/
+
+# Docker
+docker/

@@ -12,10 +12,18 @@ services:
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///./data/traffic_cop.db
       - DEBUG=false
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+      - RATE_LIMIT_PER_MINUTE=120
     volumes:
       - ../data:/app/data
       - ../models:/app/models
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # Frontend (React)
   frontend:
@@ -27,11 +35,13 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://localhost:8000/api
+      - REACT_APP_WS_URL=ws://localhost:8000/ws/live
     volumes:
       - ../frontend:/app
       - frontend_modules:/app/node_modules
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
 volumes:
   frontend_modules:
