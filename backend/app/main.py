@@ -337,6 +337,52 @@ async def upload_video(file: UploadFile = File(...), _user: str = Depends(api_ke
         "message": f"Video uploaded. Start processing with POST /api/camera/start?source={file_path}"
     }
 
+
+
+@app.get("/api/cameras")
+async def list_cameras():
+    """List all cameras in the network with live status."""
+    import yaml
+    from pathlib import Path
+    
+    cameras = []
+    config_path = Path(__file__).resolve().parents[2] / "configs" / "camera_config.yaml"
+    
+    if config_path.exists():
+        with open(config_path) as f:
+            cam_config = yaml.safe_load(f)
+        
+        for cam in cam_config.get("cameras", []):
+            # First camera is active (connected to video processor)
+            is_first = cam.get("id") == cam_config["cameras"][0]["id"]
+            is_active = video_processor and video_processor.is_running if is_first else False
+            
+            stats = video_processor.stats if (is_first and video_processor and video_processor.is_running) else {}
+            
+            cameras.append({
+                "id": cam.get("id", "unknown"),
+                "location": cam.get("location", "Unknown"),
+                "status": "active" if is_active else ("standby" if not is_first else "offline"),
+                "vehicles": stats.get("tracks", 0) if is_active else 0,
+                "congestion": stats.get("congestion", "free") if is_active else "unknown",
+                "fps": stats.get("fps", 0) if is_active else 0,
+                "coordinates": cam.get("coordinates", [0, 0]),
+            })
+    
+    # Add simulated cameras for demo if only 3 in config
+    if len(cameras) < 4:
+        cameras.append({
+            "id": "cam_04",
+            "location": "Downtown Ring Road",
+            "status": "standby",
+            "vehicles": 0,
+            "congestion": "unknown",
+            "fps": 0,
+            "coordinates": [30.05, 31.24],
+        })
+    
+    return {"cameras": cameras, "total": len(cameras), "active": sum(1 for c in cameras if c["status"] == "active")}
+
 @app.websocket("/ws/live")
 async def websocket_endpoint(websocket: WebSocket, token: str = None):
     """

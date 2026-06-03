@@ -5,7 +5,6 @@
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Detection-green.svg)
 ![DeepSORT](https://img.shields.io/badge/DeepSORT-Tracking-orange.svg)
-![RL](https://img.shields.io/badge/RL-DQN%20%7C%20PPO-purple.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688.svg)
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB.svg)
 ![Flutter](https://img.shields.io/badge/Flutter-Mobile-02569B.svg)
@@ -17,10 +16,9 @@
 
 ## 🧠 Project Overview
 
-The **AI Traffic Cop System** is an intelligent real-time surveillance system that uses **computer vision**, **deep reinforcement learning**, and **event-driven architecture** to:
+The **AI Traffic Cop System** is an intelligent real-time surveillance system that uses **computer vision**, **AI**, and **event-driven architecture** to:
 - Monitor road traffic in real-time
 - Detect traffic violations automatically
-- **Optimize traffic signal timing using RL (DQN/PPO)**
 - Predict accidents before they happen
 - Analyze city-wide congestion patterns
 - Alert authorities through multiple channels
@@ -67,17 +65,11 @@ Built with **production-grade patterns** used by companies like Uber, Tesla, and
         └─────────────┬──────────────────────────────┘
                                   │
                                   ▼
-        ┌────────────────────────────────────────────┐
-        │  🚦 RL Signal Optimization (DQN / PPO)     │
-        │  CV→State | Agent Decision | Phase Switch  │
-        └─────────────┬──────────────────────────────┘
-                                  │
-                                  ▼
     ┌─────────────────────────────────────────────────────┐
     │         🔥 EVENT BUS (Pub/Sub Architecture)         │
     │                                                     │
     │   violation.* | accident.* | congestion.* |         │
-    │   tracking.* | system.* | camera.* | rl.*           │
+    │   tracking.* | system.* | camera.*                  │
     └────────┬──────────────┬──────────────┬──────────────┘
              │              │              │
              ▼              ▼              ▼
@@ -183,108 +175,12 @@ AI-Traffic-Cop-System/
 │   ├── Dockerfile
 │   └── docker-compose.yml
 │
-├── rl_signal_control/               # 🚦 RL Signal Optimization (NEW)
-│   ├── environment/
-│   │   ├── traffic_env.py           # SUMO Gymnasium environment
-│   │   └── reward_functions.py      # 5 reward types + adaptive
-│   ├── agents/
-│   │   ├── dqn_agent.py             # Double DQN + experience replay
-│   │   ├── ppo_agent.py             # PPO + GAE + actor-critic
-│   │   └── baselines.py             # Fixed, MaxPressure, Actuated
-│   ├── training/
-│   │   ├── train.py                 # CLI training script
-│   │   └── evaluate.py             # Comparison framework
-│   ├── integration/
-│   │   ├── cv_to_rl_bridge.py       # YOLO detections → RL state
-│   │   ├── signal_controller.py     # RL actions → signal commands
-│   │   ├── live_environment.py      # Real-time RL with cameras
-│   │   ├── api_routes.py            # FastAPI /api/rl/* endpoints
-│   │   └── plug_into_backend.py     # Integration instructions
-│   └── configs/networks/
-│       ├── single.net.xml           # 4-way intersection (SUMO)
-│       └── single.rou.xml           # Traffic demand patterns
-│
 ├── data/                            # 📦 Data
 ├── models/                          # 🧠 AI Models
 ├── requirements.txt
 ├── LICENSE
 └── README.md
 ```
-
----
-
-## 🚦 RL Signal Optimization (New Module)
-
-### How It Integrates
-
-```
-EXISTING SYSTEM                           NEW RL MODULE
-══════════════                           ═══════════════
-
-Camera Feed                              
-    │                                    
-    ▼                                    
-YOLOv8 Detector ─────────────────────→ CV-to-RL Bridge
-    │                                        │
-    ▼                                        ▼
-DeepSORT Tracker ─────────────────────→ State Vector
-    │                                        │
-    ▼                                        ▼
-Speed Estimator ──────────────────────→ RL Agent (DQN/PPO)
-    │                                        │
-    ▼                                        ▼
-Violation Detection                    Signal Controller
-    │                                        │
-    ▼                                        ▼
-Event Bus ←──────────────────────────── RL Decision Events
-    │                                        
-    ▼                                        
-Dashboard (WebSocket) ←── /api/rl/* endpoints
-```
-
-### RL Performance (vs Baselines)
-
-| Method | Avg Wait (s) | Throughput | Improvement |
-|--------|:---:|:---:|:---:|
-| Fixed-Time (30s) | ~45 | ~820 veh/hr | baseline |
-| Actuated (gap-based) | ~38 | ~890 veh/hr | +14% |
-| Max-Pressure | ~35 | ~920 veh/hr | +22% |
-| **DQN (ours)** | **~28** | **~980 veh/hr** | **+37%** |
-| **PPO (ours)** | **~26** | **~1010 veh/hr** | **+41%** |
-
-### Quick Start (RL Training)
-
-```bash
-# Install RL dependencies
-pip install -r rl_signal_control/requirements.txt
-
-# Train DQN agent
-python -m rl_signal_control.training.train --agent dqn --episodes 500
-
-# Train PPO agent  
-python -m rl_signal_control.training.train --agent ppo --episodes 500
-
-# Compare all methods
-python -m rl_signal_control.training.evaluate --compare all
-
-# Activate RL in live system
-curl -X POST http://localhost:8000/api/rl/start \
-  -H "Content-Type: application/json" \
-  -d '{"agent_type": "ppo", "model_path": "checkpoints/best_model.pt"}'
-```
-
-### RL API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/rl/status` | Full system status |
-| POST | `/api/rl/start` | Activate RL control |
-| POST | `/api/rl/stop` | Revert to fixed timing |
-| POST | `/api/rl/phase` | Manual phase override |
-| GET | `/api/rl/metrics` | Performance metrics |
-| GET | `/api/rl/metrics/history` | Time series data |
-| GET | `/api/rl/models` | List trained models |
-| POST | `/api/rl/models/load` | Load specific model |
 
 ---
 
@@ -789,62 +685,97 @@ python -m uvicorn backend.app.main:app --port 8000
 
 ---
 
-## 🚘 ANPR (Automatic Number Plate Recognition)
+---
 
-> **Branch:** `feature/anpr`
+## 📷 Multi-Camera Network Feature
+
+> **Branch:** `feature/multi-camera`
+
+### What It Does
+- **2×2 camera grid** on dashboard showing all cameras simultaneously
+- **Click to expand** any camera to see live MJPEG stream
+- **Per-camera status**: Active (green) / Standby (yellow) / Offline (red)
+- **Per-camera stats**: vehicles tracked, congestion level, FPS
+- **Network summary**: total cameras, active count, total vehicles across all
 
 ### Architecture
 ```
-Vehicle Detection (YOLOv8) → Vehicle Crop → Plate Detection (OpenCV) → OCR (PaddleOCR Arabic) → Registry Lookup → Evidence Package
+camera_config.yaml → /api/cameras → MultiCameraGrid component
+                                         ↓
+                              Click tile → /api/camera/feed (MJPEG)
 ```
 
-### Modules
-| Module | File | Purpose |
-|--------|------|---------|
-| Plate Detector | `ai_engine/plate_recognition/plate_detector.py` | Finds plate region in vehicle crop (YOLOv8 + OpenCV) |
-| Plate OCR | `ai_engine/plate_recognition/plate_ocr.py` | Reads characters (PaddleOCR Arabic + EasyOCR + fallback) |
-| Plate Matcher | `ai_engine/plate_recognition/plate_matcher.py` | Looks up plate in vehicle registry |
-| Plate Pipeline | `ai_engine/plate_recognition/plate_pipeline.py` | Orchestrates detect → read → match → save evidence |
-| Backend Routes | `backend/app/routes/plates.py` | API: lookup, search, register |
-| Vehicle Registry | `backend/app/services/vehicle_registry.py` | Registry management |
-| Dashboard | `frontend/src/components/DetectedPlates.js` | Live plate detection table |
-| Evidence Viewer | `frontend/src/components/EvidenceViewer.js` | Shows violation evidence |
+### Components
+| File | Purpose |
+|------|---------|
+| `frontend/src/components/MultiCameraGrid.js` | 2×2 grid with camera tiles |
+| `backend/app/main.py` → `/api/cameras` | Returns all camera status |
+| `configs/camera_config.yaml` | Camera network configuration |
 
-### API Endpoints
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/plates` | List all registered vehicles |
-| GET | `/api/plates/lookup/{plate}` | Look up specific plate |
-| GET | `/api/plates/search?q=` | Search by plate/owner/vehicle |
-| POST | `/api/plates/register` | Register new vehicle |
-| GET | `/api/plates/stats` | ANPR statistics |
-
-### Event Bus Events
-- `plate.detected` — plate region found in frame
-- `plate.recognized` — OCR read plate characters
-- `violation.confirmed` — violation with confirmed plate + owner
-
-### Evidence Package (per violation)
+### Dashboard View
 ```
-data/evidence/{track_id}_{timestamp}/
-├── frame.jpg           ← Full frame
-├── vehicle_crop.jpg    ← Vehicle close-up
-├── plate_crop.jpg      ← Plate region
-└── violation.json      ← All metadata
+┌─────────────────────┬─────────────────────┐
+│ cam_01 ● ACTIVE     │ cam_02 ● STANDBY    │
+│ Main Street         │ Highway Exit 5      │
+│ [LIVE VIDEO FEED]   │ 📵 OFFLINE          │
+│ 5 vehicles | 6 FPS  │                     │
+├─────────────────────┼─────────────────────┤
+│ cam_03 ● STANDBY    │ cam_04 ● STANDBY    │
+│ School Zone         │ Downtown Ring Road  │
+│ 📵 OFFLINE          │ 📵 OFFLINE          │
+└─────────────────────┴─────────────────────┘
+  1 Active  |  0 Offline  |  5 Total Vehicles
 ```
 
-### Install OCR (Arabic plates)
+## 📷 Multi-Camera Setup
+
+### Add Videos to All 4 Cameras
+
+**Step 1:** Put video files in `data/videos/`:
+```
+data/videos/
+├── cam1_main_street.mp4
+├── cam2_highway.mp4
+├── cam3_school.mp4
+└── cam4_downtown.mp4
+```
+
+**Step 2:** Update `configs/camera_config.yaml`:
+```yaml
+cameras:
+  - id: "cam_01"
+    location: "Main Street Intersection"
+    source: "data/videos/cam1_main_street.mp4"
+    coordinates: [30.0444, 31.2357]
+
+  - id: "cam_02"
+    location: "Highway Exit 5"
+    source: "data/videos/cam2_highway.mp4"
+    coordinates: [30.0500, 31.2400]
+
+  - id: "cam_03"
+    location: "School Zone - Al Azhar"
+    source: "data/videos/cam3_school.mp4"
+    coordinates: [30.0455, 31.2380]
+
+  - id: "cam_04"
+    location: "Downtown Ring Road"
+    source: "data/videos/cam4_downtown.mp4"
+    coordinates: [30.0510, 31.2420]
+```
+
+**Quick Demo (same video × 4):**
 ```bash
-pip install paddleocr    # Arabic plate reading
-pip install easyocr      # Fallback (Arabic + English)
+copy data\videos\traffic.mp4 data\videos\cam1_main_street.mp4
+copy data\videos\traffic.mp4 data\videos\cam2_highway.mp4
+copy data\videos\traffic.mp4 data\videos\cam3_school.mp4
+copy data\videos\traffic.mp4 data\videos\cam4_downtown.mp4
 ```
 
-### Sample Registry
-| Plate | Owner | Vehicle |
-|-------|-------|---------|
-| ABC1234 | Ahmed Mohamed | Toyota Corolla 2022 |
-| XYZ5678 | Mohamed Ali | Hyundai Elantra 2021 |
-| GHI3456 | Omar Khaled | Nissan Sunny 2020 |
+**For real deployment:** Use RTSP camera URLs instead of files:
+```yaml
+source: "rtsp://admin:password@192.168.1.100:554/stream1"
+```
 
 ## 🧪 Testing
 
