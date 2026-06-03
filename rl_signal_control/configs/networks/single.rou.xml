@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Traffic demand for single intersection -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+    <!-- Vehicle types -->
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="13.89"/>
+    <vType id="bus" accel="1.2" decel="3.0" sigma="0.5" length="12" minGap="3.0" maxSpeed="11.11"/>
+
+    <!-- Routes through intersection -->
+    <route id="N_to_S" edges="N_in S_out"/>
+    <route id="S_to_N" edges="S_in N_out"/>
+    <route id="E_to_W" edges="E_in W_out"/>
+    <route id="W_to_E" edges="W_in E_out"/>
+    <route id="N_to_E" edges="N_in E_out"/>
+    <route id="N_to_W" edges="N_in W_out"/>
+    <route id="S_to_E" edges="S_in E_out"/>
+    <route id="S_to_W" edges="S_in W_out"/>
+    <route id="E_to_N" edges="E_in N_out"/>
+    <route id="E_to_S" edges="E_in S_out"/>
+    <route id="W_to_N" edges="W_in N_out"/>
+    <route id="W_to_S" edges="W_in S_out"/>
+
+    <!-- Traffic flows (vehicles per hour per route) -->
+    <!-- Normal traffic: ~1200 veh/hr total -->
+    <flow id="f_NS" type="car" route="N_to_S" begin="0" end="3600" vehsPerHour="200" departLane="best"/>
+    <flow id="f_SN" type="car" route="S_to_N" begin="0" end="3600" vehsPerHour="200" departLane="best"/>
+    <flow id="f_EW" type="car" route="E_to_W" begin="0" end="3600" vehsPerHour="300" departLane="best"/>
+    <flow id="f_WE" type="car" route="W_to_E" begin="0" end="3600" vehsPerHour="300" departLane="best"/>
+
+    <!-- Turning traffic -->
+    <flow id="f_NE" type="car" route="N_to_E" begin="0" end="3600" vehsPerHour="50" departLane="best"/>
+    <flow id="f_SW" type="car" route="S_to_W" begin="0" end="3600" vehsPerHour="50" departLane="best"/>
+    <flow id="f_EN" type="car" route="E_to_N" begin="0" end="3600" vehsPerHour="50" departLane="best"/>
+    <flow id="f_WS" type="car" route="W_to_S" begin="0" end="3600" vehsPerHour="50" departLane="best"/>
+
+    <!-- Rush hour burst (higher demand from East-West, seconds 900-2700) -->
+    <flow id="f_EW_rush" type="car" route="E_to_W" begin="900" end="2700" vehsPerHour="200" departLane="best"/>
+    <flow id="f_WE_rush" type="car" route="W_to_E" begin="900" end="2700" vehsPerHour="200" departLane="best"/>
+
+    <!-- Occasional buses -->
+    <flow id="f_bus_NS" type="bus" route="N_to_S" begin="0" end="3600" vehsPerHour="10" departLane="best"/>
+    <flow id="f_bus_EW" type="bus" route="E_to_W" begin="0" end="3600" vehsPerHour="10" departLane="best"/>
+
+</routes>
