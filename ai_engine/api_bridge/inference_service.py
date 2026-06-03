@@ -277,13 +277,35 @@ class InferenceService:
             self._total_inferences += 1
             self._total_time_ms += job.processing_time_ms
         
-        # Cleanup old completed jobs (prevent memory leak)
-        if len(self._jobs) > self._max_jobs:
-            completed = [jid for jid, j in self._jobs.items() 
-                        if j.status in (JobStatus.COMPLETED, JobStatus.FAILED)]
-            for jid in completed[:len(completed)//2]:
-                del self._jobs[jid]
+        # Cleanup old completed jobs (prevent memory leak) - TTL based
+        self._cleanup_old_jobs()
     
+    def _cleanup_old_jobs(self):
+        """Remove completed/failed jobs older than 5 minutes (TTL-based)."""
+        now = time.time()
+        ttl_seconds = 300  # 5 minutes
+
+        if len(self._jobs) < 50:
+            return  # No cleanup needed for small job counts
+
+        expired = [
+            jid for jid, j in self._jobs.items()
+            if j.status in (JobStatus.COMPLETED, JobStatus.FAILED)
+            and (now - j.timestamp) > ttl_seconds
+        ]
+        for jid in expired:
+            del self._jobs[jid]
+
+        # Hard cap: if still over limit, remove oldest completed
+        if len(self._jobs) > self._max_jobs:
+            completed = sorted(
+                [(jid, j) for jid, j in self._jobs.items()
+                 if j.status in (JobStatus.COMPLETED, JobStatus.FAILED)],
+                key=lambda x: x[1].timestamp
+            )
+            for jid, _ in completed[:len(completed) - self._max_jobs // 2]:
+                del self._jobs[jid]
+
     # ==================== Stream API ====================
     
     def process_stream(self, frame_generator, callback=None):
