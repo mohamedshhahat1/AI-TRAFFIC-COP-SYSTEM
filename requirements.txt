@@ -56,3 +56,13 @@ aiohttp>=3.9.0
 pytest>=7.4.0
 pytest-asyncio>=0.23.0
 httpx>=0.25.0
+
+# -------- RL Signal Control --------
+gymnasium>=0.29.0
+stable-baselines3>=2.2.0
+sb3-contrib>=2.2.0
+tensorboard>=2.15.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pandas>=2.0.0
+tqdm>=4.66.0
