@@ -38,8 +38,8 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
     description="Smart Traffic Enforcement & Analytics REST API",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    docs_url="/api/docs" if settings.DEBUG else None,
+    redoc_url="/api/redoc" if settings.DEBUG else None,
     redirect_slashes=False,
 )
 
