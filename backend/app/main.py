@@ -14,7 +14,7 @@ import os
 import asyncio
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 try:
@@ -27,6 +27,8 @@ import uvicorn
 from .config import settings
 from .routes import violations, vehicles, analytics
 from .video_processor import VideoProcessor
+from .middleware.rate_limit import RateLimitMiddleware
+from .middleware.auth import api_key_auth
 
 # Add project root to path for ai_engine imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -50,6 +52,9 @@ async def count_requests(request, call_next):
     _api_request_count += 1
     response = await call_next(request)
     return response
+
+# Rate limiting
+app.add_middleware(RateLimitMiddleware)
 
 # CORS
 app.add_middleware(
@@ -194,7 +199,7 @@ async def event_history(topic: str = "violation.*", limit: int = 20):
 
 
 @app.post("/api/camera/start")
-async def start_camera(source: str = "data/videos/traffic.mp4"):
+async def start_camera(source: str = "data/videos/traffic.mp4", _user: str = Depends(api_key_auth)):
     """Start processing video - results stream to WebSocket."""
     global video_processor
     if not ai_gateway:
@@ -205,7 +210,7 @@ async def start_camera(source: str = "data/videos/traffic.mp4"):
 
 
 @app.post("/api/camera/stop")
-async def stop_camera():
+async def stop_camera(_user: str = Depends(api_key_auth)):
     """Stop video processing."""
     global video_processor
     if video_processor:
@@ -249,7 +254,7 @@ async def video_feed():
 
 
 @app.post("/api/camera/upload")
-async def upload_video(file: UploadFile = File(...)):
+async def upload_video(file: UploadFile = File(...), _user: str = Depends(api_key_auth)):
     """Upload a traffic video for AI processing."""
     from pathlib import Path
     import shutil

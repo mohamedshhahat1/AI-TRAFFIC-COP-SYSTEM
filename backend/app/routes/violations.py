@@ -1,10 +1,12 @@
 """Violations API endpoints."""
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional
 import time
 import uuid
+
+from ..middleware.auth import api_key_auth
 
 router = APIRouter()
 
@@ -83,8 +85,8 @@ async def create_violation(data: ViolationCreate):
 
 
 @router.delete("/{violation_id}")
-async def delete_violation(violation_id: str):
-    """Delete a violation by ID."""
+async def delete_violation(violation_id: str, _user: str = Depends(api_key_auth)):
+    """Delete a violation by ID (requires authentication)."""
     global _violations
     before = len(_violations)
     _violations = [v for v in _violations if v.get("id") != violation_id]
