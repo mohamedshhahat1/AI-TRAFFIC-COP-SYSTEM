@@ -1,0 +1,40 @@
+# AI Traffic Cop System - Dataset Configuration
+# ================================================
+# This file configures the dataset for YOLOv8 training.
+#
+# To use:
+# 1. Place training images in data/images/train/
+# 2. Place validation images in data/images/val/
+# 3. Create YOLO-format annotation .txt files alongside images
+# 4. Run: python scripts/train_model.py
+#
+# For labeling, use tools like:
+# - LabelImg (https://github.com/HumanSignal/labelImg)
+# - Roboflow (https://roboflow.com)
+# - CVAT (https://cvat.ai)
+
+# Dataset paths (relative to project root)
+path: ./data
+train: images/train
+val: images/val
+test: images/test  # Optional
+
+# Number of classes
+nc: 7
+
+# Class names (must match annotation labels)
+names:
+  0: car
+  1: truck
+  2: bus
+  3: motorcycle
+  4: bicycle
+  5: person
+  6: traffic_light
+
+# Training notes:
+# - Minimum recommended: 100 images per class
+# - Ideal: 1000+ images per class for good accuracy
+# - Include various conditions: day, night, rain, different angles
+# - Pre-trained COCO weights (yolov8n.pt) already detect these classes
+#   Fine-tuning improves accuracy for your specific camera angles
