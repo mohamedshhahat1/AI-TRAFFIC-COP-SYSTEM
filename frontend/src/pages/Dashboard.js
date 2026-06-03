@@ -8,6 +8,7 @@ import { fetchStats, fetchViolations, fetchHealth, fetchCameraStats, connectWebS
 import DetectionStats from '../components/DetectionStats';
 import AccidentRiskPanel from '../components/AccidentRiskPanel';
 import TrafficHeatmap from '../components/TrafficHeatmap';
+import DetectedPlates from '../components/DetectedPlates';
 import SystemArchLive from '../components/SystemArchLive';
 
 function Dashboard() {
@@ -19,29 +20,25 @@ function Dashboard() {
   const [cameraStats, setCameraStats] = useState({});
   const [accidentRisks, setAccidentRisks] = useState([]);
   const [currentRisk, setCurrentRisk] = useState({ level: 'low', score: 0, active: 0 });
-  const accidentRisksRef = useRef([]);
 
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const [statsData, violData, healthData] = await Promise.all([
-          fetchStats(),
-          fetchViolations(10),
-          fetchHealth(),
-        ]);
-        setStats(statsData);
-        setViolations(violData);
-        setHealth(healthData);
-      } catch (e) {
-        console.error('Failed to load dashboard data:', e);
-      }
+      const [statsData, violData, healthData] = await Promise.all([
+        fetchStats(),
+        fetchViolations(10),
+        fetchHealth(),
+      ]);
+      setStats(statsData);
+      setViolations(violData);
+      setHealth(healthData);
     };
-
+    
     loadData();
     const interval = setInterval(async () => {
       loadData();
       try {
-        const data = await fetchCameraStats();
+        const res = await fetch('http://localhost:8000/api/camera/stats');
+        const data = await res.json();
         setCameraStats(data);
         if (data.detection_counts) setDetectionCounts(data.detection_counts);
       } catch(e) {}
@@ -56,12 +53,11 @@ function Dashboard() {
       }
       // Capture accident risks
       if (event.type === 'accident_risk') {
-        accidentRisksRef.current = [event.data, ...accidentRisksRef.current].slice(0, 10);
-        setAccidentRisks(accidentRisksRef.current);
+        setAccidentRisks(prev => [event.data, ...prev].slice(0, 10));
         setCurrentRisk({
           level: event.data.level || 'medium',
           score: event.data.score || event.data.risk_score || 0.5,
-          active: accidentRisksRef.current.length,
+          active: accidentRisks.length + 1,
         });
       }
       // Auto-refresh on new violation
@@ -82,22 +78,24 @@ function Dashboard() {
         <h1>📊 Real-time Traffic Dashboard</h1>
         <HealthIndicator health={health} />
       </div>
-
+      
       <StatsCards stats={stats} cameraStats={cameraStats} />
-
+      
       <SystemArchLive />
-
+      
       <div className="grid-2col">
         <LiveCameraFeed />
         <EventFeed events={liveEvents} />
       </div>
-
+      
       <DetectionStats counts={detectionCounts} />
-
+      
       <AccidentRiskPanel risks={accidentRisks} currentRisk={currentRisk} />
-
+      
+      <DetectedPlates />
+      
       <TrafficHeatmap />
-
+      
       <ViolationTable violations={violations} title="Recent Violations" />
     </div>
   );

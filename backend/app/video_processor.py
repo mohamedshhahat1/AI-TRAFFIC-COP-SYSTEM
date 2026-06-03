@@ -12,6 +12,11 @@ import uuid
 from pathlib import Path
 
 try:
+    from ai_engine.plate_recognition.plate_pipeline import PlatePipeline
+except (ImportError, Exception):
+    PlatePipeline = None
+
+try:
     from ai_engine.monitoring.logger import SystemLogger
     logger = SystemLogger("video_processor")
 except (ImportError, Exception):
@@ -29,6 +34,8 @@ class VideoProcessor:
         self._source = None
         self._loop = None
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
+        self._plate_pipeline = PlatePipeline() if PlatePipeline else None
+        self._last_plates = []
         self.camera_info = {"source": "", "name": "No camera", "resolution": "—", "fps": 0, "status": "Disconnected"}
         self._latest_frame = None  # Latest annotated frame (JPEG bytes)
         self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
@@ -66,6 +73,8 @@ class VideoProcessor:
             self._thread.join(timeout=3)
         # Reset all stats to zero
         self.stats = {"fps": 0, "objects": 0, "frame": 0, "violations": 0}
+        self._plate_pipeline = PlatePipeline() if PlatePipeline else None
+        self._last_plates = []
         self.detection_counts = {"car": 0, "truck": 0, "motorcycle": 0, "bus": 0, "person": 0, "traffic_light": 0, "bicycle": 0}
         self._confidence_sum = 0.0
         self._confidence_count = 0
@@ -168,6 +177,7 @@ class VideoProcessor:
                 "health_score": stats.get("health_score", 100),
                 "detection_counts": self.detection_counts,
                 "avg_confidence": round(self._confidence_sum / max(self._confidence_count, 1) * 100, 1),
+                "plates_detected": self._last_plates,
             }
 
             # Annotate frame with bounding boxes, IDs, speed, violations
@@ -188,6 +198,31 @@ class VideoProcessor:
                             })
             except Exception:
                 pass  # RL module not available or not started
+
+            # Run ANPR on tracked vehicles (every 5th frame to save CPU)
+            raw_tracks = results.get("tracks", [])
+            if self._plate_pipeline and raw_tracks and self.stats.get("frame", 0) % 5 == 0:
+                for track in raw_tracks[:3]:  # Max 3 per frame
+                    bbox = track.bbox if hasattr(track, 'bbox') else None
+                    if bbox:
+                        plate_result = self._plate_pipeline.process(frame, bbox, track.track_id if hasattr(track, 'track_id') else 0)
+                        if plate_result and plate_result.plate_number:
+                            self._last_plates.append({
+                                "plate": plate_result.plate_number,
+                                "owner": plate_result.owner,
+                                "track_id": plate_result.track_id,
+                                "confidence": plate_result.ocr_result.confidence if plate_result.ocr_result else 0,
+                            })
+                            # Keep last 10
+                            self._last_plates = self._last_plates[-10:]
+                            # Draw plate on annotated frame
+                            if hasattr(track, 'bbox'):
+                                x1, y1, x2, y2 = track.bbox
+                                plate_text = f"PLATE: {plate_result.plate_number}"
+                                (tw, th), _ = cv2.getTextSize(plate_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+                                cv2.rectangle(annotated, (x1, y1 - th - 30), (x1 + tw + 6, y1 - 18), (0, 200, 200), -1)
+                                cv2.putText(annotated, plate_text, (x1 + 3, y1 - 22),
+                                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
             # Encode as JPEG for streaming
             _, jpeg = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 70])

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ViolationTable from '../components/ViolationTable';
+import PlateViolationTable from '../components/PlateViolationTable';
 import { fetchViolations, fetchEventHistory } from '../services/api';
 
 function Violations() {
@@ -7,20 +8,13 @@ function Violations() {
   const [eventHistory, setEventHistory] = useState([]);
   const [filter, setFilter] = useState('');
   const [severity, setSeverity] = useState('');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchViolations(50, filter, severity);
-        const events = await fetchEventHistory('violation.*', 20);
-        setViolations(data);
-        setEventHistory(events);
-      } catch (e) {
-        console.error('Failed to load violations:', e);
-      }
-      setLoading(false);
+      const data = await fetchViolations(50, filter, severity);
+      const events = await fetchEventHistory('violation.*', 20);
+      setViolations(data);
+      setEventHistory(events);
     };
     load();
   }, [filter, severity]);
@@ -28,7 +22,7 @@ function Violations() {
   return (
     <div className="violations-page">
       <h1>🚨 Violation History</h1>
-
+      
       <div className="filters">
         <select value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="">All Types</option>
@@ -45,13 +39,11 @@ function Violations() {
           <option value="low">🟢 Low</option>
         </select>
       </div>
-
-      {loading ? (
-        <p>Loading violations...</p>
-      ) : (
-        <ViolationTable violations={violations} title="All Violations" />
-      )}
-
+      
+      <ViolationTable violations={violations} title="All Violations" />
+      
+      <PlateViolationTable />
+      
       {/* Event History */}
       <div className="panel">
         <div className="panel-header">

@@ -281,6 +281,63 @@ class TrafficEvent:
                 source="congestion_analyzer",
             )
     
+
+    # ==================== Plate Recognition Events ====================
+
+    @staticmethod
+    def plate_detected(bus: EventManager, track_id: int, bbox: tuple, confidence: float):
+        """Emit plate detected in frame event."""
+        bus.emit(
+            topic="plate.detected",
+            data={"track_id": track_id, "bbox": bbox, "confidence": confidence},
+            priority=EventPriority.NORMAL,
+            source="plate_detector",
+        )
+
+    @staticmethod
+    def plate_recognized(
+        bus: EventManager,
+        plate: str,
+        confidence: float,
+        track_id: int = 0,
+        owner: str = "Unknown",
+    ):
+        """Emit plate successfully read by OCR."""
+        bus.emit(
+            topic="plate.recognized",
+            data={
+                "plate_number": plate,
+                "confidence": confidence,
+                "track_id": track_id,
+                "owner": owner,
+            },
+            priority=EventPriority.HIGH,
+            source="plate_ocr",
+        )
+
+    @staticmethod
+    def violation_confirmed(
+        bus: EventManager,
+        plate: str,
+        owner: str,
+        violation_type: str,
+        speed: float = 0,
+        evidence_path: str = "",
+    ):
+        """Emit violation with confirmed plate + owner."""
+        bus.emit(
+            topic="violation.confirmed",
+            data={
+                "plate_number": plate,
+                "owner": owner,
+                "violation_type": violation_type,
+                "speed": speed,
+                "evidence_path": evidence_path,
+            },
+            priority=EventPriority.CRITICAL,
+            source="plate_pipeline",
+        )
+
     # ==================== System Events ====================
     
     @staticmethod

@@ -787,6 +787,65 @@ python -m uvicorn backend.app.main:app --port 8000
 # 5. Open dashboard → live violations detected 🚔
 ```
 
+---
+
+## 🚘 ANPR (Automatic Number Plate Recognition)
+
+> **Branch:** `feature/anpr`
+
+### Architecture
+```
+Vehicle Detection (YOLOv8) → Vehicle Crop → Plate Detection (OpenCV) → OCR (PaddleOCR Arabic) → Registry Lookup → Evidence Package
+```
+
+### Modules
+| Module | File | Purpose |
+|--------|------|---------|
+| Plate Detector | `ai_engine/plate_recognition/plate_detector.py` | Finds plate region in vehicle crop (YOLOv8 + OpenCV) |
+| Plate OCR | `ai_engine/plate_recognition/plate_ocr.py` | Reads characters (PaddleOCR Arabic + EasyOCR + fallback) |
+| Plate Matcher | `ai_engine/plate_recognition/plate_matcher.py` | Looks up plate in vehicle registry |
+| Plate Pipeline | `ai_engine/plate_recognition/plate_pipeline.py` | Orchestrates detect → read → match → save evidence |
+| Backend Routes | `backend/app/routes/plates.py` | API: lookup, search, register |
+| Vehicle Registry | `backend/app/services/vehicle_registry.py` | Registry management |
+| Dashboard | `frontend/src/components/DetectedPlates.js` | Live plate detection table |
+| Evidence Viewer | `frontend/src/components/EvidenceViewer.js` | Shows violation evidence |
+
+### API Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/plates` | List all registered vehicles |
+| GET | `/api/plates/lookup/{plate}` | Look up specific plate |
+| GET | `/api/plates/search?q=` | Search by plate/owner/vehicle |
+| POST | `/api/plates/register` | Register new vehicle |
+| GET | `/api/plates/stats` | ANPR statistics |
+
+### Event Bus Events
+- `plate.detected` — plate region found in frame
+- `plate.recognized` — OCR read plate characters
+- `violation.confirmed` — violation with confirmed plate + owner
+
+### Evidence Package (per violation)
+```
+data/evidence/{track_id}_{timestamp}/
+├── frame.jpg           ← Full frame
+├── vehicle_crop.jpg    ← Vehicle close-up
+├── plate_crop.jpg      ← Plate region
+└── violation.json      ← All metadata
+```
+
+### Install OCR (Arabic plates)
+```bash
+pip install paddleocr    # Arabic plate reading
+pip install easyocr      # Fallback (Arabic + English)
+```
+
+### Sample Registry
+| Plate | Owner | Vehicle |
+|-------|-------|---------|
+| ABC1234 | Ahmed Mohamed | Toyota Corolla 2022 |
+| XYZ5678 | Mohamed Ali | Hyundai Elantra 2021 |
+| GHI3456 | Omar Khaled | Nissan Sunny 2020 |
+
 ## 🧪 Testing
 
 ```bash
