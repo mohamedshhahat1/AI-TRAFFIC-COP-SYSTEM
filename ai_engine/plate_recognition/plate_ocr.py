@@ -83,7 +83,7 @@ class PlateOCR:
         if self.backend in ("auto", "easy"):
             try:
                 import easyocr
-                self._engine = easyocr.Reader(['en'], gpu=False, verbose=False)
+                self._engine = easyocr.Reader(['ar', 'en'], gpu=False, verbose=False)
                 self.backend = "easy"
                 return
             except ImportError:
@@ -248,21 +248,26 @@ class PlateOCR:
     def _clean_plate(self, raw_text: str) -> str:
         """
         Clean and normalize OCR output to a valid plate format.
-        Removes special characters, normalizes spacing.
+        Supports both English and Arabic plates.
         """
-        # Remove non-alphanumeric
-        cleaned = re.sub(r'[^A-Za-z0-9]', '', raw_text.upper())
-        
-        # Common OCR corrections
-        corrections = {'O': '0', 'I': '1', 'S': '5', 'B': '8', 'G': '6'}
-        # Only apply to positions that should be digits (last 4 chars typically)
-        if len(cleaned) >= 4:
-            suffix = cleaned[-4:]
-            for old, new in corrections.items():
-                suffix = suffix.replace(old, new)
-            cleaned = cleaned[:-4] + suffix
-        
-        # Valid plate: at least 4 characters
-        if len(cleaned) >= 4:
+        # Keep Arabic letters (؀-ۿ), English letters, and digits
+        cleaned = re.sub(r'[^؀-ۿA-Za-z0-9]', '', raw_text)
+
+        # Check if plate contains Arabic characters
+        has_arabic = bool(re.search(r'[؀-ۿ]', cleaned))
+
+        if not has_arabic:
+            cleaned = cleaned.upper()
+            # Common OCR corrections for English plates (digit positions only)
+            corrections = {'O': '0', 'I': '1', 'S': '5', 'B': '8', 'G': '6'}
+            if len(cleaned) >= 4:
+                suffix = cleaned[-4:]
+                for old, new in corrections.items():
+                    suffix = suffix.replace(old, new)
+                cleaned = cleaned[:-4] + suffix
+
+        # Valid plate: at least 3 characters (Arabic plates can be shorter)
+        min_len = 3 if has_arabic else 4
+        if len(cleaned) >= min_len:
             return cleaned
         return ""
