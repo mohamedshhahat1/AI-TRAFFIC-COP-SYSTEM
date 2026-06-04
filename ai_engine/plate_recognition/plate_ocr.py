@@ -83,7 +83,7 @@ class PlateOCR:
         if self.backend in ("auto", "easy"):
             try:
                 import easyocr
-                self._engine = easyocr.Reader(['ar', 'en'], gpu=False, verbose=False)  # Arabic + English
+                self._engine = easyocr.Reader(['en'], gpu=False, verbose=False)
                 self.backend = "easy"
                 return
             except ImportError:
@@ -108,10 +108,10 @@ class PlateOCR:
     def read(self, plate_image: np.ndarray) -> Optional[OCRResult]:
         """
         Read characters from a license plate image.
-        
+
         Args:
             plate_image: BGR image of the license plate (cropped)
-            
+
         Returns:
             OCRResult with plate number and confidence, or None
         """
@@ -125,7 +125,15 @@ class PlateOCR:
         if self.backend == "paddle":
             return self._read_paddle(processed)
         elif self.backend == "easy":
-            return self._read_easy(processed)
+            result = self._read_easy(processed)
+            if result:
+                return result
+            # Retry on upscaled color image if grayscale failed
+            h, w = plate_image.shape[:2]
+            if h < 100:
+                upscaled = cv2.resize(plate_image, (w * 3, h * 3), interpolation=cv2.INTER_CUBIC)
+                return self._read_easy(upscaled)
+            return None
         elif self.backend == "tesseract":
             return self._read_tesseract(processed)
         else:
@@ -134,17 +142,18 @@ class PlateOCR:
     def _preprocess(self, plate_img: np.ndarray) -> np.ndarray:
         """
         Pre-process plate image for better OCR accuracy.
-        - Resize to standard height
+        - Upscale small plates to minimum readable size
         - Grayscale + CLAHE contrast enhancement
-        - Adaptive thresholding
+        - Denoising
         """
-        # Resize to standard height (64px)
         h, w = plate_img.shape[:2]
         if h < 10 or w < 10:
             return plate_img
-        
-        scale = 64.0 / h
-        resized = cv2.resize(plate_img, (int(w * scale), 64), interpolation=cv2.INTER_CUBIC)
+
+        # Upscale small plates — OCR needs at least ~100px height
+        target_h = max(100, h)
+        scale = target_h / h
+        resized = cv2.resize(plate_img, (int(w * scale), target_h), interpolation=cv2.INTER_CUBIC)
 
         # Convert to grayscale
         if len(resized.shape) == 3:
@@ -187,17 +196,20 @@ class PlateOCR:
     def _read_easy(self, processed: np.ndarray) -> Optional[OCRResult]:
         """Read using EasyOCR."""
         try:
-            results = self._engine.readtext(processed)
+            results = self._engine.readtext(processed, detail=1, paragraph=False)
             if results:
                 texts = [r[1] for r in results]
                 confs = [r[2] for r in results]
-                
+
                 raw = " ".join(texts)
                 plate = self._clean_plate(raw)
                 avg_conf = sum(confs) / len(confs) if confs else 0
-                
+
                 if plate:
+                    logger.info(f"EasyOCR read: '{raw}' → '{plate}' (conf={avg_conf:.2f})")
                     return OCRResult(plate_number=plate, confidence=avg_conf, raw_text=raw)
+                else:
+                    logger.debug(f"EasyOCR raw text '{raw}' did not pass plate filter")
         except Exception as e:
             logger.error(f"EasyOCR error: {e}")
         return None
