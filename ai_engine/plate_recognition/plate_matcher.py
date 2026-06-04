@@ -83,41 +83,58 @@ class PlateMatcher:
             self._save_registry()
 
     def _create_sample_registry(self) -> Dict[str, dict]:
-        """Create a sample vehicle registry for demo."""
+        """Create a sample vehicle registry with Egyptian plates."""
         return {
-            "ABC1234": {"owner": "Ahmed Mohamed", "vehicle": "Toyota Corolla 2022", "color": "White", "violations_history": 2},
-            "XYZ5678": {"owner": "Mohamed Ali", "vehicle": "Hyundai Elantra 2021", "color": "Silver", "violations_history": 0},
-            "DEF9012": {"owner": "Sara Hassan", "vehicle": "Kia Sportage 2023", "color": "Black", "violations_history": 1},
-            "GHI3456": {"owner": "Omar Khaled", "vehicle": "Nissan Sunny 2020", "color": "Red", "violations_history": 5},
-            "JKL7890": {"owner": "Fatma Ibrahim", "vehicle": "Toyota Yaris 2022", "color": "Blue", "violations_history": 0},
-            "MNO2345": {"owner": "Hassan Ahmed", "vehicle": "Chevrolet Optra 2019", "color": "Gray", "violations_history": 3},
-            "PQR6789": {"owner": "Nour Saeed", "vehicle": "Hyundai Accent 2021", "color": "White", "violations_history": 1},
-            "STU0123": {"owner": "Youssef Tarek", "vehicle": "Suzuki Swift 2020", "color": "Green", "violations_history": 0},
+            "سعر1234": {"owner": "أحمد محمد", "vehicle": "تويوتا كورولا 2022", "color": "أبيض", "violations_history": 2},
+            "قنا5678": {"owner": "محمد علي", "vehicle": "هيونداي إلنترا 2021", "color": "فضي", "violations_history": 0},
+            "جمص9012": {"owner": "سارة حسن", "vehicle": "كيا سبورتاج 2023", "color": "أسود", "violations_history": 1},
+            "طبع3456": {"owner": "عمر خالد", "vehicle": "نيسان صني 2020", "color": "أحمر", "violations_history": 5},
+            "لمن7890": {"owner": "فاطمة إبراهيم", "vehicle": "تويوتا ياريس 2022", "color": "أزرق", "violations_history": 0},
+            "وهد2345": {"owner": "حسن أحمد", "vehicle": "شيفروليه أوبترا 2019", "color": "رمادي", "violations_history": 3},
+            "بحث6789": {"owner": "نور سعيد", "vehicle": "هيونداي أكسنت 2021", "color": "أبيض", "violations_history": 1},
+            "عصم0123": {"owner": "يوسف طارق", "vehicle": "سوزوكي سويفت 2020", "color": "أخضر", "violations_history": 0},
         }
 
     def _save_registry(self):
         """Save registry to disk."""
         self.registry_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.registry_path, 'w') as f:
-            json.dump(self._registry, f, indent=2)
+        with open(self.registry_path, 'w', encoding='utf-8') as f:
+            json.dump(self._registry, f, indent=2, ensure_ascii=False)
         logger.info(f"Registry saved: {len(self._registry)} entries")
+
+    def _normalize_plate(self, plate: str) -> str:
+        """Normalize plate for lookup: strip spaces, uppercase English."""
+        return plate.replace(" ", "").upper().strip()
+
+    def _build_lookup_index(self):
+        """Build a normalized lookup index for the registry."""
+        self._lookup_index = {}
+        for plate_key in self._registry:
+            normalized = self._normalize_plate(plate_key)
+            self._lookup_index[normalized] = plate_key
 
     def lookup(self, plate_number: str) -> Optional[VehicleInfo]:
         """
         Look up a plate number in the registry.
-        
-        Args:
-            plate_number: Cleaned plate string (e.g., "ABC1234")
-            
-        Returns:
-            VehicleInfo if found, None if unregistered
-        """
-        plate = plate_number.upper().strip()
+        Handles both Arabic and English plates, with or without spaces.
 
-        if plate in self._registry:
-            entry = self._registry[plate]
+        Args:
+            plate_number: Cleaned plate string (e.g., "ABC1234" or "سعر1234")
+
+        Returns:
+            VehicleInfo if found, with registered=False if not in registry
+        """
+        if not hasattr(self, '_lookup_index'):
+            self._build_lookup_index()
+
+        normalized = self._normalize_plate(plate_number)
+
+        # Try normalized lookup
+        original_key = self._lookup_index.get(normalized)
+        if original_key:
+            entry = self._registry[original_key]
             return VehicleInfo(
-                plate_number=plate,
+                plate_number=plate_number,
                 owner=entry.get("owner", "Unknown"),
                 vehicle=entry.get("vehicle", "Unknown"),
                 color=entry.get("color", "Unknown"),
@@ -127,7 +144,7 @@ class PlateMatcher:
 
         # Not in registry
         return VehicleInfo(
-            plate_number=plate,
+            plate_number=plate_number,
             owner="Unregistered",
             vehicle="Unknown",
             color="Unknown",

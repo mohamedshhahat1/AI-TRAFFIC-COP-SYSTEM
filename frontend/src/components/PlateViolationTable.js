@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../services/api';
 
 function PlateViolationTable() {
   const [plates, setPlates] = useState([]);
@@ -7,9 +8,9 @@ function PlateViolationTable() {
   useEffect(() => {
     const load = async () => {
       try {
-        const url = search 
-          ? `http://localhost:8000/api/plates/search?q=${search}`
-          : 'http://localhost:8000/api/plates';
+        const url = search
+          ? `${API_BASE}/plates/search?q=${search}`
+          : `${API_BASE}/plates`;
         const res = await fetch(url);
         const data = await res.json();
         if (search) {
@@ -65,10 +66,10 @@ function PlateViolationTable() {
             <tbody>
               {plates.map((p, i) => (
                 <tr key={i}>
-                  <td style={{fontWeight: 'bold', color: '#4285f4'}}>{p.plate || p.plate_number}</td>
-                  <td>{p.owner}</td>
-                  <td>{p.vehicle}</td>
-                  <td>{p.color}</td>
+                  <td style={{fontWeight: 'bold', color: '#4285f4', direction: 'auto'}}>{p.plate || p.plate_number}</td>
+                  <td style={{direction: 'auto'}}>{p.owner}</td>
+                  <td style={{direction: 'auto'}}>{p.vehicle}</td>
+                  <td style={{direction: 'auto'}}>{p.color}</td>
                   <td>
                     <span className={`badge ${p.violations_history > 3 ? 'badge-red' : p.violations_history > 0 ? 'badge-orange' : 'badge-green'}`}>
                       {p.violations_history || 0}
