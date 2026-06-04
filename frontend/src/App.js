@@ -3,6 +3,8 @@ import Dashboard from './pages/Dashboard';
 import Violations from './pages/Violations';
 import Monitoring from './pages/Monitoring';
 import Results from './pages/Results';
+import RLSignalControl from './pages/RLSignalControl';
+import MultiCamera from './pages/MultiCamera';
 import './App.css';
 
 function App() {
@@ -13,19 +15,27 @@ function App() {
       <nav className="sidebar">
         <div className="logo">🚔 AI Traffic Cop</div>
         <ul>
-          <li className={currentPage === 'dashboard' ? 'active' : ''} 
+          <li className={currentPage === 'dashboard' ? 'active' : ''}
               onClick={() => setCurrentPage('dashboard')}>
             📊 Dashboard
           </li>
-          <li className={currentPage === 'violations' ? 'active' : ''} 
+          <li className={currentPage === 'violations' ? 'active' : ''}
               onClick={() => setCurrentPage('violations')}>
             🚨 Violations
           </li>
-          <li className={currentPage === 'monitoring' ? 'active' : ''} 
+          <li className={currentPage === 'rl' ? 'active' : ''}
+              onClick={() => setCurrentPage('rl')}>
+            🚦 RL Signal Control
+          </li>
+          <li className={currentPage === 'cameras' ? 'active' : ''}
+              onClick={() => setCurrentPage('cameras')}>
+            📷 Multi-Camera
+          </li>
+          <li className={currentPage === 'monitoring' ? 'active' : ''}
               onClick={() => setCurrentPage('monitoring')}>
             📈 Monitoring
           </li>
-          <li className={currentPage === 'results' ? 'active' : ''} 
+          <li className={currentPage === 'results' ? 'active' : ''}
               onClick={() => setCurrentPage('results')}>
             📊 Results
           </li>
@@ -37,6 +47,8 @@ function App() {
       <main className="content">
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'violations' && <Violations />}
+        {currentPage === 'rl' && <RLSignalControl />}
+        {currentPage === 'cameras' && <MultiCamera />}
         {currentPage === 'monitoring' && <Monitoring />}
         {currentPage === 'results' && <Results />}
       </main>

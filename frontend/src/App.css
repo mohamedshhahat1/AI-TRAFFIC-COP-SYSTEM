@@ -794,3 +794,560 @@ tr:hover { background: rgba(255,255,255,0.02); }
 @media (max-width: 768px) {
   .camera-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================
+   RL Signal Control Page
+   ============================================ */
+
+.rl-page { padding-bottom: 40px; }
+.rl-page h1 { margin-bottom: 4px; }
+.page-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+
+.rl-error {
+  background: rgba(234,67,53,0.15);
+  color: var(--danger);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(234,67,53,0.3);
+  margin-bottom: 20px;
+}
+
+.system-pulse.active { color: var(--success); }
+.system-pulse.inactive { color: var(--danger); }
+
+.rl-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 20px;
+}
+
+.rl-config-section h3, .rl-signal-section h3 {
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+}
+
+.rl-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rl-config-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rl-config-form select,
+.rl-config-form input {
+  padding: 8px 12px;
+  background: var(--dark);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.rl-config-form select:disabled,
+.rl-config-form input:disabled {
+  opacity: 0.5;
+}
+
+.rl-action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn-start, .btn-stop, .btn-reset, .btn-load-model {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.btn-start { background: var(--success); color: #fff; }
+.btn-start:hover { background: #2d9248; }
+.btn-stop { background: var(--danger); color: #fff; }
+.btn-stop:hover { background: #d32f2f; }
+.btn-reset { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); }
+.btn-reset:hover { background: var(--dark); }
+.btn-load-model { background: var(--primary); color: #fff; padding: 6px 14px; font-size: 0.8rem; }
+.btn-load-model:hover { background: #1565c0; }
+.btn-start:disabled, .btn-stop:disabled, .btn-load-model:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Traffic Light */
+.signal-display {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.traffic-light {
+  background: #111;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 2px solid #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.traffic-light .light {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #222;
+  transition: all 0.3s;
+}
+
+.light.red { background: #3a1111; }
+.light.red.on { background: #ea4335; box-shadow: 0 0 20px rgba(234,67,53,0.7); }
+.light.yellow { background: #3a3011; }
+.light.yellow.on { background: #fbbc04; box-shadow: 0 0 20px rgba(251,188,4,0.7); }
+.light.green { background: #113a11; }
+.light.green.on { background: #34a853; box-shadow: 0 0 20px rgba(52,168,83,0.7); }
+
+.signal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signal-phase-name { font-size: 1.1rem; font-weight: bold; color: #fff; }
+.signal-duration { font-size: 0.85rem; color: var(--text-muted); }
+.signal-mode { font-size: 0.8rem; padding: 3px 10px; border-radius: 12px; background: rgba(66,133,244,0.15); color: var(--info); display: inline-block; }
+.signal-switches { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Phase Grid */
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.phase-card {
+  background: var(--dark);
+  padding: 16px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.phase-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.phase-card.active { border-color: var(--success); background: rgba(52,168,83,0.1); }
+.phase-card.disabled { opacity: 0.4; cursor: not-allowed; }
+
+.phase-icon { font-size: 1.5rem; display: block; margin-bottom: 6px; }
+.phase-name { font-size: 0.8rem; display: block; margin-bottom: 4px; color: #fff; }
+.phase-directions { font-size: 0.7rem; color: var(--text-muted); }
+
+.phase-active-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--success);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: bold;
+}
+
+/* Intersection Visualization */
+.intersection-viz {
+  display: flex;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.intersection-grid {
+  display: grid;
+  grid-template-columns: 80px 80px 80px;
+  grid-template-rows: 80px 80px 80px;
+  gap: 4px;
+}
+
+.intersection-cell { background: transparent; }
+
+.intersection-road {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #333;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  position: relative;
+}
+
+.intersection-road.green { background: rgba(52,168,83,0.2); color: var(--success); }
+.intersection-road.red { background: rgba(234,67,53,0.15); color: var(--danger); }
+
+.road-signal {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.road-signal.green { background: var(--success); box-shadow: 0 0 8px rgba(52,168,83,0.5); }
+.road-signal.yellow { background: var(--warning); box-shadow: 0 0 8px rgba(251,188,4,0.5); }
+.road-signal.red { background: var(--danger); box-shadow: 0 0 8px rgba(234,67,53,0.5); }
+
+.intersection-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #444;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+/* Phase Distribution */
+.phase-distribution {
+  padding: 10px 20px 20px;
+}
+
+.phase-distribution h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.phase-bars { display: flex; flex-direction: column; gap: 8px; }
+
+.phase-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.phase-bar-label { font-size: 0.8rem; min-width: 100px; }
+
+.phase-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.phase-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+.phase-bar-value {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Metrics History Table */
+.metrics-history-table {
+  padding: 0 20px 20px;
+  overflow-x: auto;
+}
+
+.metrics-history-table table { width: 100%; }
+.metrics-history-table th { font-size: 0.75rem; }
+.metrics-history-table td { font-size: 0.85rem; }
+.metrics-history-table td.positive { color: var(--success); }
+.metrics-history-table td.negative { color: var(--danger); }
+
+/* Model Management */
+.models-list {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.model-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--dark);
+  border-radius: 8px;
+}
+
+.model-info { display: flex; align-items: center; gap: 12px; }
+.model-name { font-weight: 600; font-size: 0.9rem; }
+
+.model-badges { display: flex; gap: 6px; }
+.badge-best { background: rgba(52,168,83,0.2); color: var(--success); padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; }
+.badge-final { background: rgba(66,133,244,0.2); color: var(--info); padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; }
+
+@media (max-width: 768px) {
+  .rl-controls-grid { grid-template-columns: 1fr; }
+  .phase-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============================================
+   Multi-Camera Page
+   ============================================ */
+
+.multicamera-page { padding-bottom: 40px; }
+.multicamera-page h1 { margin-bottom: 4px; }
+
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.view-toggle button {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.view-toggle button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.view-toggle button:hover:not(.active) {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Network Overview */
+.network-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 20px;
+}
+
+.network-stat-card {
+  text-align: center;
+  padding: 16px 12px;
+  background: var(--dark);
+  border-radius: 10px;
+}
+
+.network-stat-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.network-stat-card .network-stat-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff;
+  display: block;
+}
+
+.network-stat-card .network-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+/* Camera Grid (Multi-Camera Page) */
+.mc-camera-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.mc-camera-tile {
+  background: var(--dark);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mc-camera-tile:hover { border-color: var(--primary); transform: translateY(-2px); }
+.mc-camera-tile.selected { border-color: var(--success); box-shadow: 0 0 16px rgba(52,168,83,0.3); }
+.mc-camera-tile.offline { opacity: 0.6; }
+
+.mc-camera-feed {
+  height: 160px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-camera-stream { width: 100%; height: 100%; object-fit: cover; }
+
+.mc-camera-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.mc-camera-icon { font-size: 2.5rem; }
+.mc-vehicle-count { font-size: 0.85rem; color: var(--info); font-weight: 600; }
+.mc-fps-badge { font-size: 0.75rem; color: var(--text-muted); }
+
+.mc-camera-offline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.mc-camera-offline.large {
+  height: 300px;
+  justify-content: center;
+}
+
+.mc-offline-icon { font-size: 2rem; }
+
+.mc-camera-info { padding: 12px 16px; }
+
+.mc-camera-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.mc-status-dot { font-size: 0.75rem; }
+.mc-camera-id { font-size: 0.8rem; color: var(--text-muted); }
+.mc-camera-location { font-size: 0.9rem; font-weight: 600; display: block; margin-bottom: 8px; }
+
+.mc-camera-stats { display: flex; justify-content: space-between; align-items: center; }
+.mc-congestion { font-size: 0.8rem; font-weight: 600; }
+
+/* Camera Table */
+.mc-camera-table { padding: 0 20px 20px; overflow-x: auto; }
+.mc-camera-table table { width: 100%; }
+.mc-camera-table td { font-size: 0.85rem; }
+.mc-id-cell { font-family: monospace; color: var(--info); }
+.row-offline { opacity: 0.5; }
+
+.btn-view-cam {
+  padding: 5px 12px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.btn-view-cam:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Camera Detail Panel */
+.mc-detail-panel { border: 2px solid var(--primary); }
+
+.btn-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.btn-close:hover { color: #fff; }
+
+.mc-detail-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.mc-detail-stream {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.mc-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mc-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.mc-detail-label { color: var(--text-muted); }
+
+/* Congestion Overview */
+.congestion-summary {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.congestion-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.congestion-location {
+  min-width: 180px;
+  font-size: 0.85rem;
+}
+
+.congestion-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.congestion-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+.congestion-label {
+  min-width: 100px;
+  text-align: right;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .mc-camera-grid { grid-template-columns: 1fr; }
+  .mc-detail-content { grid-template-columns: 1fr; }
+  .page-header-row { flex-direction: column; gap: 12px; }
+}

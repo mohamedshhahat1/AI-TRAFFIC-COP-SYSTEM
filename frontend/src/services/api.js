@@ -239,5 +239,138 @@ export function connectWebSocket(onMessage, onError = null) {
   };
 }
 
+// ==================== RL Signal Control APIs ====================
+
+export async function fetchRLStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/status`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch RL status:', err);
+    return { running: false, agent_type: null, control_mode: 'simulated' };
+  }
+}
+
+export async function startRL(config = {}) {
+  try {
+    const res = await fetch(`${API_BASE}/rl/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to start RL:', err);
+    return { status: 'error', message: err.message };
+  }
+}
+
+export async function stopRL() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/stop`, { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to stop RL:', err);
+    return { status: 'error', message: err.message };
+  }
+}
+
+export async function fetchRLMetrics() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/metrics`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch RL metrics:', err);
+    return {};
+  }
+}
+
+export async function fetchRLMetricsHistory(lastN = 100) {
+  try {
+    const res = await fetch(`${API_BASE}/rl/metrics/history?last_n=${lastN}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch RL metrics history:', err);
+    return { metrics: [] };
+  }
+}
+
+export async function fetchRLControllerState() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/controller/state`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch controller state:', err);
+    return {};
+  }
+}
+
+export async function fetchRLControllerStats() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/controller/statistics`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch controller stats:', err);
+    return {};
+  }
+}
+
+export async function fetchRLModels() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/models`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch RL models:', err);
+    return { models: [] };
+  }
+}
+
+export async function loadRLModel(agentType = 'dqn', modelPath = null) {
+  try {
+    let url = `${API_BASE}/rl/models/load?agent_type=${agentType}`;
+    if (modelPath) url += `&model_path=${encodeURIComponent(modelPath)}`;
+    const res = await fetch(url, { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to load RL model:', err);
+    return { status: 'error', message: err.message };
+  }
+}
+
+export async function resetRLStats() {
+  try {
+    const res = await fetch(`${API_BASE}/rl/reset`, { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to reset RL stats:', err);
+    return { status: 'error', message: err.message };
+  }
+}
+
+export async function setRLManualPhase(phase) {
+  try {
+    const res = await fetch(`${API_BASE}/rl/phase`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phase }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to set phase:', err);
+    return { accepted: false, error: err.message };
+  }
+}
+
 // Export API_BASE for components that need the base URL (e.g., MJPEG stream)
 export { API_BASE };
