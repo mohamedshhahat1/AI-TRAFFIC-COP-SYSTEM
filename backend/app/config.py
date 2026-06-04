@@ -37,7 +37,7 @@ class Settings:
     ALERT_EMAIL: str = os.getenv("ALERT_EMAIL", "")
 
     # Rate limiting
-    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "600"))
 
     def __post_init__(self):
         if self.CORS_ORIGINS is None:

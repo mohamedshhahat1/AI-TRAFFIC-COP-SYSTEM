@@ -30,7 +30,7 @@ An **intelligent traffic surveillance and enforcement platform** combining deep 
 - **WebSocket** real-time event streaming (violations, tracking, accidents, RL decisions)
 - **Event Bus** architecture (pub/sub) for decoupled components
 - **SQLite/PostgreSQL** database with async SQLAlchemy ORM
-- **API Key authentication** with rate limiting (60 req/min)
+- **API Key authentication** with rate limiting (600 req/min default)
 - **Prometheus-compatible** metrics export
 - **Health monitoring** with component status tracking
 - **File upload** with validation, sanitization, and size limits
@@ -227,7 +227,7 @@ AI-TRAFFIC-COP-SYSTEM/
 | `DATABASE_URL` | DB connection string | SQLite |
 | `API_KEY` | Authentication key (empty = dev mode) | `` |
 | `CORS_ORIGINS` | Allowed origins (comma-separated) | localhost |
-| `RATE_LIMIT_PER_MINUTE` | Max requests/IP/minute | `60` |
+| `RATE_LIMIT_PER_MINUTE` | Max requests/IP/minute | `600` |
 | `SMTP_HOST` | Alert email server | `smtp.gmail.com` |
 | `ALERT_EMAIL` | Violation alert recipient | `` |
 | `REACT_APP_API_URL` | Frontend API URL | `/api` |
@@ -319,7 +319,7 @@ make lint             # Code style (ruff)
 ## 🔒 Security
 
 - ✅ API Key Authentication (sensitive endpoints)
-- ✅ Rate Limiting (60 req/min per IP)
+- ✅ Rate Limiting (600 req/min per IP)
 - ✅ File Upload Sanitization (extension + size + path validation)
 - ✅ CORS Restriction (explicit origins, no wildcard)
 - ✅ WebSocket Token Auth
