@@ -40,7 +40,7 @@ function ViolationTable({ violations = [], title = 'Violations' }) {
             <tbody>
               {violations.map((v, i) => (
                 <tr key={i}>
-                  <td>{v.timestamp ? new Date(v.timestamp * 1000).toLocaleTimeString() : '-'}</td>
+                  <td>{v.timestamp ? new Date(v.timestamp).toLocaleTimeString() : '-'}</td>
                   <td>{typeIcon(v.type)}</td>
                   <td><span className={`badge ${severityClass(v.severity)}`}>{v.severity}</span></td>
                   <td>#{v.track_id} ({v.vehicle_class || 'car'})</td>

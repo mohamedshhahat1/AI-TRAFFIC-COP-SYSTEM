@@ -3,7 +3,9 @@ License Plates API Routes
 ANPR endpoints for plate lookup, search, and evidence.
 """
 
+import json
 from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import Response
 from typing import Optional
 
 router = APIRouter()
@@ -16,13 +18,21 @@ except Exception:
     registry = None
 
 
+def json_response(data):
+    """Return JSON response with proper UTF-8 encoding for Arabic text."""
+    return Response(
+        content=json.dumps(data, ensure_ascii=False),
+        media_type="application/json; charset=utf-8",
+    )
+
+
 @router.get("")
 @router.get("/")
 async def list_plates():
     """List all registered vehicles."""
     if registry:
-        return {"total": len(registry.get_all()), "vehicles": registry.get_all()}
-    return {"total": 0, "vehicles": {}}
+        return json_response({"total": len(registry.get_all()), "vehicles": registry.get_all()})
+    return json_response({"total": 0, "vehicles": {}})
 
 
 @router.get("/lookup/{plate_number}")
@@ -30,10 +40,10 @@ async def lookup_plate(plate_number: str):
     """Look up a specific plate number."""
     if not registry:
         raise HTTPException(status_code=503, detail="Registry not available")
-    
+
     info = registry.lookup(plate_number)
     if info:
-        return info
+        return json_response(info)
     raise HTTPException(status_code=404, detail="Plate not found")
 
 
@@ -41,8 +51,8 @@ async def lookup_plate(plate_number: str):
 async def search_plates(q: str = Query(..., description="Search by plate, owner, or vehicle")):
     """Search vehicle registry."""
     if not registry:
-        return {"results": []}
-    return {"results": registry.search(q)}
+        return json_response({"results": []})
+    return json_response({"results": registry.search(q)})
 
 
 @router.post("/register")

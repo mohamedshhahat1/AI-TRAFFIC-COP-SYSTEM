@@ -71,7 +71,7 @@ class PlateMatcher:
         """Load vehicle registry from JSON file."""
         if self.registry_path.exists():
             try:
-                with open(self.registry_path) as f:
+                with open(self.registry_path, encoding='utf-8') as f:
                     self._registry = json.load(f)
                 logger.info(f"Registry loaded: {len(self._registry)} entries")
             except Exception as e:
