@@ -35,16 +35,13 @@ An **intelligent traffic surveillance and enforcement platform** combining deep 
 - **Health monitoring** with component status tracking
 - **File upload** with validation, sanitization, and size limits
 
-### 📊 Frontend (React)
-- **Real-time Dashboard** with live camera feed (MJPEG streaming)
-- **Violation History** with type/severity filtering
-- **Traffic Heatmap** showing congestion zones from live data
-- **Detection Statistics** with per-class breakdown
-- **Accident Risk Panel** with TTC alerts
-- **Detected Plates** display with owner info (ANPR)
-- **Multi-Camera Grid** for simultaneous monitoring
-- **System Architecture** live performance counters
-- **Results & Evaluation** page with all metrics
+### 📊 Frontend (React) — 6 Pages
+- **Real-time Dashboard** — live camera feed (MJPEG), stats cards, system architecture counters, detection stats, accident risk panel, detected plates (ANPR), traffic heatmap, multi-camera overview, violation table
+- **Violations** — full violation history with type/severity filtering, plate violation table, event bus history
+- **RL Signal Control** — live traffic light visualization, agent configuration (DQN/PPO), start/stop controls, 4-phase selector, intersection view with directional signals, RL performance metrics, phase time distribution, metrics history, CV-to-RL bridge stats, trained model management
+- **Multi-Camera** — grid/list view toggle, network overview (cameras, vehicles, FPS, uptime), expandable camera tiles with live feeds, per-camera detail panel, congestion overview bars
+- **Monitoring** — system health with component status, performance metrics (FPS, latency, p95), event bus stats (emitted, handled, dead letters, success rate), filterable system logs
+- **Results & Evaluation** — live metrics table (confidence, FPS, frames, vehicles, violations, processing time, events, inferences, uptime, API requests), detection breakdown by class, technology stack reference, academic notes
 
 ### 📱 Mobile App (Flutter)
 - Real-time violation alerts via WebSocket
@@ -55,38 +52,57 @@ An **intelligent traffic surveillance and enforcement platform** combining deep 
 ### 🤖 RL Traffic Signal Control
 - **Custom Gymnasium environment** simulating intersection traffic
 - **PPO and DQN agents** trained with Stable-Baselines3
-- **Live integration** — feeds from CV pipeline to RL decisions
+- **Live integration** — CV pipeline feeds vehicle data to RL via CV-to-RL bridge
 - **Reward functions** balancing throughput, wait time, and fairness
-- **Signal controller** that executes RL decisions on traffic lights
+- **Signal controller** with safety constraints (min/max green, yellow transitions, all-red clearance)
+- **Frontend dashboard** — traffic light visualization, phase control, intersection view, metrics
+- **REST API** — 11 endpoints for full RL control (`/api/rl/*`)
 - **TensorBoard** training visualization
+- **Model management** — list, load, and switch between trained models
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Frontend (React)                          │
-│   Dashboard │ Violations │ Monitoring │ Results │ Multi-Camera   │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │ HTTP / WebSocket
-┌───────────────────────────────┴─────────────────────────────────┐
-│                     Backend (FastAPI)                             │
-│   Auth │ Rate Limit │ Routes │ WebSocket │ Event Bus │ DB        │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-┌───────────────────────────────┴─────────────────────────────────┐
-│                      AI Engine                                    │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────┐  │
-│  │ YOLOv8   │→│ DeepSORT │→│  Speed      │→│  Violations   │  │
-│  │ Detector │  │ Tracker  │  │  Estimator │  │  Engine       │  │
-│  └──────────┘  └──────────┘  └────────────┘  └──────────────┘  │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────┐  │
-│  │ Accident │  │   ANPR   │  │ Multi-Cam  │  │  RL Signal   │  │
-│  │ Predictor│  │ Pipeline │  │  Fusion    │  │  Controller  │  │
-│  └──────────┘  └──────────┘  └────────────┘  └──────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                                Frontend (React)                                  │
+│  Dashboard │ Violations │ RL Signal Control │ Multi-Camera │ Monitoring │ Results │
+└──────────────────────────────────────┬───────────────────────────────────────────┘
+                                       │ HTTP / WebSocket
+┌──────────────────────────────────────┴───────────────────────────────────────────┐
+│                              Backend (FastAPI)                                    │
+│      Auth │ Rate Limit │ Routes │ WebSocket │ Event Bus │ DB │ RL Routes          │
+└──────────────────────────────────────┬───────────────────────────────────────────┘
+                                       │
+┌──────────────────────────────────────┴───────────────────────────────────────────┐
+│                                   AI Engine                                       │
+│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────┐                   │
+│  │ YOLOv8   │→│ DeepSORT │→│  Speed      │→│  Violations   │                   │
+│  │ Detector │  │ Tracker  │  │  Estimator │  │  Engine       │                   │
+│  └──────────┘  └──────────┘  └────────────┘  └──────────────┘                   │
+│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────┐                   │
+│  │ Accident │  │   ANPR   │  │ Multi-Cam  │  │  RL Signal   │                   │
+│  │ Predictor│  │ Pipeline │  │  Fusion    │  │  Controller  │                   │
+│  └──────────┘  └──────────┘  └────────────┘  └──────────────┘                   │
+└──────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 📸 Screenshots
+
+| Dashboard | Live Detection |
+|:---------:|:--------------:|
+| ![Dashboard](docs/screenshots/dashboard-full.png) | ![Detection](docs/screenshots/dashboard-car-detected.png) |
+
+| ANPR (License Plates) | Multi-Camera Grid |
+|:---------------------:|:-----------------:|
+| ![ANPR](docs/screenshots/anpr-dashboard-plates.png) | ![Multi-Camera](docs/screenshots/multi-camera-grid.png) |
+
+| Live Camera Feed | Annotated Frame |
+|:----------------:|:---------------:|
+| ![Camera](docs/screenshots/camera-live-streaming.png) | ![Annotated](docs/screenshots/annotated-frame-demo.png) |
 
 ---
 
@@ -172,7 +188,7 @@ AI-TRAFFIC-COP-SYSTEM/
 ├── frontend/                   # React dashboard
 │   └── src/
 │       ├── components/         # UI components (camera, heatmap, plates, etc.)
-│       ├── pages/              # Dashboard, Violations, Results, Monitoring
+│       ├── pages/              # Dashboard, Violations, RLSignalControl, MultiCamera, Monitoring, Results
 │       └── services/           # API service layer
 ├── mobile_app/                 # Flutter mobile app
 │   └── lib/
@@ -242,22 +258,59 @@ make lint             # Code style (ruff)
 
 ## 📡 API Reference
 
+#### Core APIs
+
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/api/health` | No | Health check |
-| GET | `/api/violations/` | No | List violations |
+| GET | `/api/health` | No | Health check with AI Gateway status |
+| GET | `/api/violations/` | No | List violations (filter by type/severity) |
 | POST | `/api/violations/` | No | Create violation |
 | DELETE | `/api/violations/{id}` | ✅ | Delete violation |
-| GET | `/api/vehicles/` | No | List vehicles |
-| GET | `/api/analytics/` | No | System analytics |
+| GET | `/api/vehicles/` | No | List tracked vehicles |
+| GET | `/api/analytics/` | No | System analytics summary |
+| GET | `/api/analytics/health` | No | Component health + alerts |
+| GET | `/api/analytics/metrics` | No | Performance metrics (FPS, latency, p95) |
 | GET | `/api/analytics/heatmap` | No | Congestion zones |
-| GET | `/api/analytics/metrics/prometheus` | No | Prometheus metrics |
-| POST | `/api/camera/start` | ✅ | Start AI processing |
+| GET | `/api/analytics/logs` | No | System logs (filter by level/component) |
+| GET | `/api/analytics/metrics/prometheus` | No | Prometheus metrics export |
+| GET | `/api/stats/requests` | No | Total API requests count |
+| GET | `/api/plates/` | No | Detected license plates |
+
+#### Camera APIs
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/camera/start` | ✅ | Start AI video processing |
 | POST | `/api/camera/stop` | ✅ | Stop processing |
-| GET | `/api/camera/feed` | No | MJPEG video stream |
-| POST | `/api/camera/upload` | ✅ | Upload video |
-| GET | `/api/plates/` | No | Detected plates |
-| WS | `/ws/live?token=KEY` | ✅* | Real-time events |
+| GET | `/api/camera/feed` | No | MJPEG annotated video stream |
+| GET | `/api/camera/stats` | No | Live processing stats (FPS, objects, tracks) |
+| GET | `/api/camera/info` | No | Camera source info (resolution, status) |
+| POST | `/api/camera/upload` | ✅ | Upload video file for processing |
+| GET | `/api/cameras` | No | List all cameras in the network |
+
+#### Event Bus APIs
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/events/metrics` | No | Event bus stats (emitted, handled, dead letters) |
+| GET | `/api/events/history` | No | Recent events by topic |
+| WS | `/ws/live?token=KEY` | ✅* | Real-time event stream (violations, tracking, accidents, RL) |
+
+#### RL Signal Control APIs
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/rl/status` | No | RL system status (running, agent, mode) |
+| POST | `/api/rl/start` | No | Start RL-based signal control |
+| POST | `/api/rl/stop` | No | Stop RL control (revert to fixed timing) |
+| GET | `/api/rl/metrics` | No | RL performance metrics + CV bridge stats |
+| GET | `/api/rl/metrics/history` | No | Metrics history for charting |
+| GET | `/api/rl/controller/state` | No | Current signal state (phase, duration, mode) |
+| GET | `/api/rl/controller/statistics` | No | Phase distribution, switches/min, avg duration |
+| POST | `/api/rl/phase` | No | Manual phase override (for testing) |
+| GET | `/api/rl/models` | No | List trained RL models |
+| POST | `/api/rl/models/load` | No | Load a specific trained model |
+| POST | `/api/rl/reset` | No | Reset all RL statistics |
 
 *WebSocket auth required only when `API_KEY` is set.
 
